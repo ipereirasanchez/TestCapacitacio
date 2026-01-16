@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nota de NORMA</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin:0; background:#f6f7fb; }
+    .wrap { max-width: 900px; margin: 0 auto; padding: 16px; }
+    .card { background:#fff; border:1px solid #e6e6e6; border-radius: 14px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.04); }
+    label { font-weight: 600; display:block; margin: 12px 0 6px; }
+    input, textarea { width: 100%; padding: 10px; border-radius: 10px; border:1px solid #d8d8d8; font-family: inherit; }
+    textarea { min-height: 180px; }
+    .row { display:flex; gap: 12px; flex-wrap: wrap; align-items:center; margin-top: 12px; }
+    button { padding: 10px 12px; border-radius: 12px; border: 1px solid #d8d8d8; background:#fff; cursor:pointer; }
+    button.primary { background:#2d6cdf; color:#fff; border-color:#2d6cdf; }
+    .muted { color:#666; }
+    a { color:#2d6cdf; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color:#555; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Nota de NORMA</h1>
+      <p class="muted" id="meta"></p>
+
+      <label for="url">URL (opcional)</label>
+      <input id="url" type="url" placeholder="https://..." />
+      <div id="urlPreview" class="muted" style="margin-top:6px;"></div>
+
+      <label for="text">Información / apuntes</label>
+      <textarea id="text" placeholder="Escribe aquí tus notas..."></textarea>
+
+      <div class="row">
+        <button class="primary" id="saveBtn">Guardar</button>
+        <button id="backBtn">Volver</button>
+      </div>
+
+      <p class="muted" style="margin-top:12px;">
+        Se guarda localmente en este dispositivo (localStorage).
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    function getParam(name) {
+      const u = new URL(window.location.href);
+      return u.searchParams.get(name) || "";
+    }
+
+    // Ahora "id" es norma_id
+    const normaId = getParam("id");     // ej: "rd-1211-1990-art-6"
+    const normaTxt = getParam("t");     // texto NORMA (para mostrar)
+    const key = "note:norma:" + normaId;
+
+    if (normaTxt) {
+      $("meta").innerHTML = `<b>NORMA:</b> ${normaTxt}<br><span class="code">ID: ${normaId || "sin-norma"}</span>`;
+    } else {
+      $("meta").innerHTML = `<span class="code">NORMA ID: ${normaId || "sin-norma"}</span>`;
+    }
+
+    // Cargar
+    try {
+      const saved = JSON.parse(localStorage.getItem(key) || "{}");
+      $("url").value = saved.url || "";
+      $("text").value = saved.text || "";
+    } catch {}
+
+    function renderPreview() {
+      const url = $("url").value.trim();
+      if (url) {
+        $("urlPreview").innerHTML = `Enlace guardado: <a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+      } else {
+        $("urlPreview").textContent = "";
+      }
+    }
+    renderPreview();
+    $("url").addEventListener("input", renderPreview);
+
+    // Guardar
+    $("saveBtn").addEventListener("click", () => {
+      if (!normaId) {
+        alert("No hay NORMA ID. Asegúrate de que questions.json incluye norma_id.");
+        return;
+      }
+      const payload = {
+        url: $("url").value.trim(),
+        text: $("text").value,
+        updatedAt: new Date().toISOString(),
+      };
+      localStorage.setItem(key, JSON.stringify(payload));
+      alert("Guardado ✅");
+    });
+
+    // Volver
+    $("backBtn").addEventListener("click", () => {
+      window.history.back();
+    });
+  </script>
+</body>
+</html>
