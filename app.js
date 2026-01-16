@@ -41,13 +41,19 @@ function fillTopicsSelect() {
     opt.textContent = t;
     sel.appendChild(opt);
   });
-  // selecciona el primero por defecto si existe
   if (sel.options.length > 0) sel.options[0].selected = true;
 }
 
 function getSelectedTopics() {
   const sel = $("topics");
   return Array.from(sel.selectedOptions).map(o => o.value);
+}
+
+// Enlace a nota POR NORMA (norma_id)
+function noteHref(q) {
+  const id = (q.norma_id && String(q.norma_id).trim()) ? String(q.norma_id).trim() : "sin-norma";
+  const t = encodeURIComponent(q.norma || "");
+  return `note.html?id=${encodeURIComponent(id)}&t=${t}`;
 }
 
 function renderQuestion() {
@@ -63,7 +69,16 @@ function renderQuestion() {
   // opciones
   const box = $("qOptions");
   box.innerHTML = "";
-  q.options.forEach(o => {
+
+  // defensa: si vinieran sin opciones
+  if (!q.options || !q.options.length) {
+    $("qMsg").innerHTML = "<b>Esta pregunta no tiene opciones detectadas.</b>";
+    setHidden($("qMsg"), false);
+  } else {
+    setHidden($("qMsg"), true);
+  }
+
+  (q.options || []).forEach(o => {
     const row = document.createElement("label");
     row.className = "opt";
     row.innerHTML = `
@@ -78,8 +93,6 @@ function renderQuestion() {
   });
 
   setHidden($("hintBox"), true);
-  setHidden($("qMsg"), true);
-
   show("screen-question");
 }
 
@@ -93,7 +106,7 @@ function renderFeedback() {
   const box = $("fOptions");
   box.innerHTML = "";
 
-  q.options.forEach(o => {
+  (q.options || []).forEach(o => {
     const row = document.createElement("div");
     row.className = "opt";
 
@@ -112,14 +125,17 @@ function renderFeedback() {
     box.appendChild(row);
   });
 
-  // norma también aquí
-  const norma = q.norma || "";
-  if (norma.trim()) {
-    $("fNorma").innerHTML = `<b>NORMA:</b> ${norma}`;
-    setHidden($("fNorma"), false);
-  } else {
-    setHidden($("fNorma"), true);
-  }
+  // NORMA + link a nota (por norma_id)
+  const norma = (q.norma || "").trim();
+  const link = noteHref(q);
+
+  $("fNorma").innerHTML = `
+    <div>${norma ? `<b>NORMA:</b> ${norma}` : "No hay NORMA para esta pregunta."}</div>
+    <div style="margin-top:8px;">
+      <a href="${link}">${norma ? "Ver/editar nota" : "Crear nota"}</a>
+    </div>
+  `;
+  setHidden($("fNorma"), false);
 
   show("screen-feedback");
 }
@@ -178,14 +194,25 @@ $("startBtn").addEventListener("click", startTest);
 
 $("hintBtn").addEventListener("click", () => {
   const q = currentSet[idx];
-  const norma = q.norma || "";
-  if (norma.trim()) {
-    $("hintBox").innerHTML = `<b>NORMA:</b> ${norma}`;
-    setHidden($("hintBox"), false);
+  const norma = (q.norma || "").trim();
+  const link = noteHref(q);
+
+  if (norma) {
+    $("hintBox").innerHTML = `
+      <div><b>NORMA:</b> ${norma}</div>
+      <div style="margin-top:8px;">
+        <a href="${link}">Ver/editar nota</a>
+      </div>
+    `;
   } else {
-    $("hintBox").innerHTML = "No hay NORMA para esta pregunta.";
-    setHidden($("hintBox"), false);
+    $("hintBox").innerHTML = `
+      <div>No hay NORMA para esta pregunta.</div>
+      <div style="margin-top:8px;">
+        <a href="${link}">Crear nota</a>
+      </div>
+    `;
   }
+  setHidden($("hintBox"), false);
 });
 
 $("applyBtn").addEventListener("click", () => {
@@ -212,6 +239,6 @@ $("nextBtn").addEventListener("click", nextQuestion);
     show("screen-setup");
   } catch (e) {
     console.error(e);
-    $("status").textContent = "Error cargando questions.json. Asegúrate de que está en el mismo directorio.";
+    $("status").textContent = "Error cargando questions.json. Asegúrate de que está en el mismo directorio del repo.";
   }
 })();
