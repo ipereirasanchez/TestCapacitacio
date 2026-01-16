@@ -19,8 +19,6 @@
     button.danger { background:#e5484d; color:#fff; border-color:#e5484d; }
     button.success { background:#2e7d32; color:#fff; border-color:#2e7d32; }
     button.info { background:#0288d1; color:#fff; border-color:#0288d1; }
-    a { color:#2d6cdf; text-decoration: none; }
-    a:hover { text-decoration: underline; }
     .muted { color:#666; }
     .hidden { display:none; }
     .options { margin-top: 12px; display:flex; flex-direction: column; gap: 10px; }
@@ -94,3 +92,24 @@
       <div id="hintBox" class="hint hidden"></div>
       <div id="qMsg" class="hint hidden"></div>
     </div>
+
+    <!-- Pantalla: corrección -->
+    <div class="card hidden" id="screen-feedback" style="margin-top:14px;">
+      <h2 id="fTitle">Corrección</h2>
+      <div class="muted" id="fMeta"></div>
+
+      <div style="margin-top:10px;" id="fText"></div>
+      <div class="options" id="fOptions"></div>
+
+      <div id="fNorma" class="hint hidden"></div>
+
+      <div class="row" style="margin-top:12px;">
+        <button class="success" id="nextBtn">Siguiente pregunta</button>
+        <button class="danger" id="exitBtn2">Salir</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
