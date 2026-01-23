@@ -88,10 +88,17 @@
     App.state.results[idx] = { question: q, user: userSelected, correct: isCorrect };
 
     saveCurrentState();
+
+    // En modo examen, avanzar directo
     if (App.state.isExamMode) {
-      nextQuestion();
+      if (idx >= currentSet.length - 1) {
+        App.render.renderQuestion();
+      } else {
+        nextQuestion();
+      }
     } else {
-      App.render.renderFeedback();
+      // En modo práctica, re-renderizar para mostrar feedback inline + cambiar botón a "Siguiente"
+      App.render.renderQuestion();
     }
   };
 
@@ -141,6 +148,7 @@
     if (!Number.isFinite(newIndex)) return;
     if (newIndex < 0 || newIndex >= App.state.currentSet.length) return;
     App.state.idx = newIndex;
+    App.state.userSelected = null; // Reset temp selection when jumping
     saveCurrentState();
     App.render.renderQuestion();
   };
@@ -151,6 +159,7 @@
     App.state.userSelected = null;
     setHidden(byId("setupMsg"), true);
     setHidden(byId("prog-wrap"), true);
+    setHidden(byId("bottomNav"), true); // Hide nav
     clearCurrentState();
     App.render.renderHistoryTable();
     show("screen-setup");

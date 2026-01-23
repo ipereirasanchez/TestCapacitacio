@@ -1,84 +1,67 @@
 // js/app.events.js
 (() => {
-  window.App = window.App || {};
-
   const byId = App.dom.byId;
 
   const bindEvents = () => {
-    const modeEl = byId("mode");
-    if (modeEl) {
-      modeEl.addEventListener("change", () => {
-        const isAll = modeEl.value === "all200";
-        const nWrap = byId("nWrap");
-        if (nWrap) nWrap.style.display = isAll ? "none" : "block";
-      });
-    }
-
+    // Setup
     const startBtn = byId("startBtn");
     if (startBtn) startBtn.addEventListener("click", App.actions.startTest);
 
-    const hintBtn = byId("hintBtn");
-    if (hintBtn) {
-      hintBtn.addEventListener("click", () => {
-        const q = App.state.currentSet[App.state.idx];
-        const norma = q?.norma || "";
-        const hintBox = byId("hintBox");
-        if (!hintBox) return;
+    const modeSel = byId("mode");
+    if (modeSel) modeSel.addEventListener("change", (e) => {
+      App.dom.setHidden(byId("nWrap"), e.target.value === "all200");
+    });
 
-        if (norma.trim()) hintBox.innerHTML = `<b>NORMA:</b> ${norma}`;
-        else hintBox.innerHTML = "No hay NORMA para esta pregunta.";
+    // Question Actions (Delegate if needed, but IDs are static now)
+    // We use a shared Main Action Button now in renderQuestion, but binding locally 
+    // inside render is safer for dynamic context, however global buttons need global binding.
+    // So we don't need to bind it here.
 
-        App.dom.setHidden(hintBox, false);
-      });
-    }
+    const finishBtn = byId("finishBtn");
+    if (finishBtn) finishBtn.addEventListener("click", App.actions.finishTest);
 
-    const applyBtn = byId("applyBtn");
-    if (applyBtn) applyBtn.addEventListener("click", App.actions.applyAnswer);
-
-    const skipBtn = byId("skipBtn");
-    if (skipBtn) skipBtn.addEventListener("click", App.actions.skipQuestion);
-
-    const exitBtn1 = byId("exitBtn1");
+    // Exit Buttons
+    const exitBtn1 = byId("exitBtn1"); // Legacy support if element remains
     if (exitBtn1) exitBtn1.addEventListener("click", App.actions.exitToSetup);
 
-    const exitBtn2 = byId("exitBtn2");
-    if (exitBtn2) exitBtn2.addEventListener("click", App.actions.exitToSetup);
+    const exitLink = byId("exitLink"); // new header exit icon
+    if (exitLink) exitLink.addEventListener("click", App.actions.exitToSetup);
 
-    const nextBtn = byId("nextBtn");
-    if (nextBtn) nextBtn.addEventListener("click", App.actions.nextQuestion);
+    // Hints
+    const hintBtn = byId("hintBtn");
+    if (hintBtn) hintBtn.addEventListener("click", () => {
+      // Simple toggle logic or Action
+      const box = byId("hintBox");
+      const q = App.state.currentSet[App.state.idx];
+      if (box && q) {
+        box.innerHTML = `<b>Pista:</b> ${q.norma || "No hay norma específica."}`;
+        App.dom.setHidden(box, false);
+      }
+    });
+
+    // Summary Actions
+    const backBtn = byId("backBtn");
+    if (backBtn) backBtn.addEventListener("click", App.actions.exitToSetup);
 
     const reviewBtn = byId("reviewBtn");
     if (reviewBtn) reviewBtn.addEventListener("click", App.actions.reviewWrongQuestions);
 
-    const backBtn = byId("backBtn");
-    if (backBtn) backBtn.addEventListener("click", App.actions.exitToSetup);
+    // Grid Modal
+    const closeGridBtn = byId("closeGridBtn");
+    if (closeGridBtn) closeGridBtn.addEventListener("click", App.render.closeNavGrid);
 
-    const jumpSelect = byId("jumpSelect");
-    if (jumpSelect) {
-      jumpSelect.addEventListener("change", (e) => {
-        const newIndex = Number(e.target.value);
-        if (Number.isNaN(newIndex)) return;
-        App.actions.jumpToQuestion(newIndex);
-      });
-    }
+    const finishGridBtn = byId("finishGridBtn");
+    if (finishGridBtn) finishGridBtn.addEventListener("click", () => {
+      App.render.closeNavGrid();
+      App.actions.finishTest();
+    });
 
-    const sumViewBtn = byId("sumViewBtn");
-    if (sumViewBtn) sumViewBtn.addEventListener("click", App.actions.viewCorrectionFromSummary);
-
-    const finishBtns = document.querySelectorAll(".finish-test-btn");
-    finishBtns.forEach(btn => btn.addEventListener("click", App.actions.finishTest));
-
+    // Resume Logic
     const resumeBtn = byId("resumeBtn");
     if (resumeBtn) resumeBtn.addEventListener("click", App.actions.loadSession);
 
     const clearHistoryBtn = byId("clearHistoryBtn");
-    if (clearHistoryBtn) {
-      clearHistoryBtn.addEventListener("click", () => {
-        if (confirm("¿Estás seguro de que quieres borrar el historial?")) {
-          App.actions.clearHistory();
-        }
-      });
-    }
+    if (clearHistoryBtn) clearHistoryBtn.addEventListener("click", App.actions.clearHistory);
   };
 
   App.events = { bindEvents };

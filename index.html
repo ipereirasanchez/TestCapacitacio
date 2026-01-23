@@ -11,12 +11,24 @@
 
 <body>
   <div class="wrap">
-    <div class="card" id="card-header">
-      <h1>Test Capacitació</h1>
-      <p class="muted" id="status">Cargando banco de preguntas…</p>
+    <!-- Header -->
+    <div class="card" id="card-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+      <div>
+        <h1>Test Capacitació</h1>
+        <p class="muted" id="status">Cargando banco de preguntas…</p>
+      </div>
+      <div class="top-bar-actions">
+        <button class="icon-btn hidden" id="exitLink" title="Salir del test">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+          </svg>
+        </button>
+      </div>
     </div>
 
-    <!-- Barra de progreso (visible durante el test) -->
+    <!-- Barra de progreso -->
     <div id="prog-wrap" class="hidden">
       <div class="progress-container">
         <div id="pBar" class="progress-bar"></div>
@@ -55,8 +67,8 @@
         </label>
       </div>
 
-      <div class="row" style="margin-top:12px;">
-        <button class="primary" id="startBtn">Empezar</button>
+      <div class="row" style="margin-top:20px;">
+        <button class="primary" id="startBtn" style="width:100%">Empezar Test</button>
         <button class="success hidden" id="resumeBtn">Reanudar test anterior</button>
       </div>
 
@@ -65,88 +77,103 @@
 
     <!-- Pantalla: historial -->
     <div class="card" id="screen-history" style="margin-top:14px;">
-      <h2>Historial de resultados</h2>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h2 style="margin:0;">Historial</h2>
+        <button id="clearHistoryBtn" class="danger" style="padding: 6px 12px; font-size: 0.8em;">Borrar</button>
+      </div>
       <div id="historyTableContainer" style="overflow-x:auto;">
         <p class="muted">Aún no hay resultados registrados.</p>
       </div>
-      <div class="row" style="margin-top:12px;">
-        <button id="clearHistoryBtn" class="danger" style="min-width:auto; padding: 6px 12px; font-size: 0.8em;">Borrar
-          historial</button>
-      </div>
     </div>
 
-    <!-- Pantalla: pregunta -->
+    <!-- Pantalla UNIFICADA: Pregunta -->
     <div class="card hidden" id="screen-question" style="margin-top:14px;">
       <div class="topline">
-        <div>
-          <h2 id="qTitle">Pregunta</h2>
-          <div class="muted" id="qMeta"></div>
-        </div>
-        <div class="muted" id="qCounter"></div>
+        <h2 id="qTitle" style="margin:0;">Pregunta</h2>
+        <div class="code" id="qMeta"></div>
+        <!-- Pista button moved to header of card if needed, or kept in options -->
       </div>
 
-      <div style="margin-top:10px;" id="qText"></div>
+      <!-- Text -->
+      <div style="margin-top:16px; font-size:1.1rem; line-height:1.6;" id="qText"></div>
+
+      <!-- Options -->
       <div class="options" id="qOptions"></div>
 
-      <div class="row" style="margin-top:12px;">
-        <button class="info" id="hintBtn">Pista</button>
-        <button class="primary" id="applyBtn">Aplicar selección</button>
-        <button id="skipBtn">Siguiente sin contestar</button>
-        <button class="success finish-test-btn">Finalizar test</button>
-        <button class="danger" id="exitBtn1">Salir del test</button>
-      </div>
-      <div class="row" style="margin-bottom:12px;">
-        <label for="jumpSelect">Ir a la pregunta</label>
-        <select id="jumpSelect"></select>
+      <!-- Inline Feedback Container -->
+      <div id="inlineFeedback" class="hidden"></div>
+
+      <!-- Action Area for Mobile/desktop specific main button if needed -->
+      <div style="margin-top:24px;">
+        <button class="primary" id="mainActionBtn"
+          style="width:100%; font-size:1.1rem; padding:16px;">Comprobar</button>
+        <button class="success hidden" id="finishBtn" style="width:100%; margin-top:12px; padding:12px;">Finalizar
+          Test</button>
+        <button class="info hidden" id="hintBtn" style="width:100%; margin-top:8px;">💡 Ver Pista</button>
       </div>
 
-      <div id="hintBox" class="hint hidden"></div>
-      <div id="qMsg" class="hint hidden"></div>
+      <div id="hintBox" class="hint hidden" style="margin-top:12px;"></div>
+      <div id="qMsg" class="hint hidden" style="margin-top:12px;"></div>
     </div>
 
-    <!-- Pantalla: corrección -->
-    <div class="card hidden" id="screen-feedback" style="margin-top:14px;">
-      <h2 id="fTitle">Corrección</h2>
-      <div class="muted" id="fMeta"></div>
-
-      <div style="margin-top:10px;" id="fText"></div>
-      <div class="options" id="fOptions"></div>
-
-      <div id="fNorma" class="hint hidden"></div>
-
-      <div class="row" style="margin-top:12px;">
-        <button class="success" id="nextBtn">Siguiente pregunta</button>
-        <button class="success finish-test-btn">Finalizar test</button>
-        <button class="danger" id="exitBtn2">Salir</button>
-      </div>
-      <div id="fMsg" class="hint hidden"></div>
-    </div>
-    <!-- Pantalla: resumen -->
     <!-- Pantalla: resumen -->
     <div class="card hidden" id="screen-summary" style="margin-top:14px;">
       <h2>Resumen del test</h2>
 
-      <p id="sumTime"></p>
-      <p id="sumCorrect"></p>
-      <p id="sumWrong"></p>
-      <p id="sumSkipped"></p>
-
-      <!-- Navegación por preguntas desde el resumen -->
-      <div style="margin-top:12px;">
-        <label for="sumJumpSelect">Revisar pregunta</label>
-        <select id="sumJumpSelect"></select>
-        <p class="muted" style="margin:8px 0 0 0;">
-          Verde = correcta, rojo = incorrecta, sin icono = sin responder.
-        </p>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:20px;">
+        <div class="opt correct" style="flex-direction:column; align-items:center; gap:4px">
+          <span style="font-size:2rem; font-weight:700;" id="sumCorrect">0</span>
+          <span style="font-size:0.9rem;">Aciertos</span>
+        </div>
+        <div class="opt wrong" style="flex-direction:column; align-items:center; gap:4px">
+          <span style="font-size:2rem; font-weight:700;" id="sumWrong">0</span>
+          <span style="font-size:0.9rem;">Fallos</span>
+        </div>
       </div>
 
-      <div class="row" style="margin-top:12px;">
-        <button class="info" id="sumViewBtn">Ver corrección</button>
-      </div>
+      <p id="sumTime" class="muted" style="text-align:center;"></p>
+      <p id="sumSkipped" class="muted" style="text-align:center; display:none;"></p>
+      <!-- Hidden by default, less relevant now -->
 
-      <div class="row" style="margin-top:12px;">
-        <button class="info" id="reviewBtn">Repetir fallos</button>
+      <div class="row" style="margin-top:24px;">
+        <button class="primary" id="reviewBtn">Repetir fallos</button>
         <button class="danger" id="backBtn">Volver al menú</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sticky Bottom Nav -->
+  <div id="bottomNav" class="bottom-nav hidden">
+    <button class="nav-btn" id="navPrev">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m15 18-6-6 6-6" />
+      </svg>
+    </button>
+
+    <div class="nav-center" id="navIndicator">Pregunta 1/20</div>
+
+    <button class="nav-btn" id="navNext">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m9 18 6-6-6-6" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Modal Grid Navigation -->
+  <div class="modal-overlay" id="navGridModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="margin:0">Navegación</h3>
+        <button id="closeGridBtn"
+          style="background:none; border:none; padding:4px; font-size:1.5rem; cursor:pointer;">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="nav-grid" id="navGrid"></div>
+      </div>
+      <div style="padding:16px; border-top:1px solid var(--border);">
+        <button class="success" id="finishGridBtn" style="width:100%">Finalizar Test</button>
       </div>
     </div>
   </div>
