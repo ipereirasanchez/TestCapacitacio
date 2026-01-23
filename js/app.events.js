@@ -64,6 +64,18 @@
 
     const sumViewBtn = byId("sumViewBtn");
     if (sumViewBtn) sumViewBtn.addEventListener("click", App.actions.viewCorrectionFromSummary);
+
+    const resumeBtn = byId("resumeBtn");
+    if (resumeBtn) resumeBtn.addEventListener("click", App.actions.loadSession);
+
+    const clearHistoryBtn = byId("clearHistoryBtn");
+    if (clearHistoryBtn) {
+      clearHistoryBtn.addEventListener("click", () => {
+        if (confirm("¿Estás seguro de que quieres borrar el historial?")) {
+          App.actions.clearHistory();
+        }
+      });
+    }
   };
 
   App.events = { bindEvents };

@@ -23,5 +23,14 @@
     return { minutes, seconds };
   };
 
-  App.utils = { shuffle, sample, formatDurationMs };
+  const storage = {
+    set: (key, val) => localStorage.setItem(`test_cap_${key}`, JSON.stringify(val)),
+    get: (key) => {
+      const v = localStorage.getItem(`test_cap_${key}`);
+      return v ? JSON.parse(v) : null;
+    },
+    remove: (key) => localStorage.removeItem(`test_cap_${key}`),
+  };
+
+  App.utils = { shuffle, sample, formatDurationMs, storage };
 })();

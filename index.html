@@ -187,9 +187,22 @@
 
       <div class="row" style="margin-top:12px;">
         <button class="primary" id="startBtn">Empezar</button>
+        <button class="success hidden" id="resumeBtn">Reanudar test anterior</button>
       </div>
 
       <div id="setupMsg" class="hint hidden"></div>
+    </div>
+
+    <!-- Pantalla: historial -->
+    <div class="card" id="screen-history" style="margin-top:14px;">
+      <h2>Historial de resultados</h2>
+      <div id="historyTableContainer" style="overflow-x:auto;">
+        <p class="muted">Aún no hay resultados registrados.</p>
+      </div>
+      <div class="row" style="margin-top:12px;">
+        <button id="clearHistoryBtn" class="danger" style="min-width:auto; padding: 6px 12px; font-size: 0.8em;">Borrar
+          historial</button>
+      </div>
     </div>
 
     <!-- Pantalla: pregunta -->

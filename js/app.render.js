@@ -152,5 +152,53 @@
     show("screen-summary");
   };
 
-  App.render = { renderQuestion, renderFeedback, renderSummary, renderJumpSelect };
+  const renderHistoryTable = () => {
+    const container = byId("historyTableContainer");
+    if (!container) return;
+
+    const history = App.utils.storage.get("history") || [];
+    if (history.length === 0) {
+      container.innerHTML = '<p class="muted">Aún no hay resultados registrados.</p>';
+      return;
+    }
+
+    let html = `
+      <table style="width:100%; border-collapse: collapse; margin-top:10px; font-size: 0.9em;">
+        <thead>
+          <tr style="text-align:left; border-bottom: 2px solid #eee;">
+            <th style="padding:8px;">Fecha</th>
+            <th style="padding:8px;">Result.</th>
+            <th style="padding:8px;">Tiempo</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    history.forEach((h) => {
+      const date = new Date(h.date).toLocaleDateString() + " " + new Date(h.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const { minutes, seconds } = App.utils.formatDurationMs(h.duration);
+      const score = Math.round((h.correct / h.total) * 100);
+
+      html += `
+        <tr style="border-bottom: 1px solid #eee;">
+          <td style="padding:8px;">${date}</td>
+          <td style="padding:8px;">
+            <span style="color:${score >= 50 ? 'green' : 'red'}"><b>${h.correct}/${h.total}</b> (${score}%)</span>
+          </td>
+          <td style="padding:8px;">${minutes}m ${seconds}s</td>
+        </tr>
+      `;
+    });
+
+    html += "</tbody></table>";
+    container.innerHTML = html;
+  };
+
+  App.render = {
+    renderQuestion,
+    renderFeedback,
+    renderSummary,
+    renderJumpSelect,
+    renderHistoryTable
+  };
 })();

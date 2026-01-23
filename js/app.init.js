@@ -23,6 +23,14 @@
       if (status) status.textContent = `Banco cargado: ${App.state.BANK.length} preguntas.`;
 
       App.actions.fillTopicsSelect();
+      App.render.renderHistoryTable();
+
+      // Detectar sesión guardada
+      const session = App.utils.storage.get("session");
+      if (session) {
+        App.dom.setHidden(App.dom.byId("resumeBtn"), false);
+      }
+
       App.dom.show("screen-setup");
     } catch (e) {
       console.error(e);

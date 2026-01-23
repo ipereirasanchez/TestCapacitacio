@@ -67,6 +67,7 @@
     App.state.endTime = null;
 
     setHidden(byId("setupMsg"), true);
+    saveCurrentState();
     App.render.renderQuestion();
   };
 
@@ -87,6 +88,7 @@
     App.state.answers[idx] = { selected: userSelected, correct: isCorrect };
     App.state.results[idx] = { question: q, user: userSelected, correct: isCorrect };
 
+    saveCurrentState();
     App.render.renderFeedback();
   };
 
@@ -96,6 +98,8 @@
       App.render.renderQuestion();
     } else {
       App.state.endTime = Date.now();
+      clearCurrentState();
+      addToHistory();
       App.render.renderSummary();
     }
   };
@@ -114,6 +118,7 @@
     if (!Number.isFinite(newIndex)) return;
     if (newIndex < 0 || newIndex >= App.state.currentSet.length) return;
     App.state.idx = newIndex;
+    saveCurrentState();
     App.render.renderQuestion();
   };
 
@@ -122,6 +127,8 @@
     App.state.idx = 0;
     App.state.userSelected = null;
     setHidden(byId("setupMsg"), true);
+    clearCurrentState();
+    App.render.renderHistoryTable();
     show("screen-setup");
   };
 
@@ -160,6 +167,57 @@
     App.render.renderFeedback();
   };
 
+  const saveCurrentState = () => {
+    const { currentSet, idx, answers, results, startTime } = App.state;
+    if (!currentSet || currentSet.length === 0) return;
+    App.utils.storage.set("session", { currentSet, idx, answers, results, startTime });
+  };
+
+  const clearCurrentState = () => {
+    App.utils.storage.remove("session");
+  };
+
+  const loadSession = () => {
+    const session = App.utils.storage.get("session");
+    if (!session) return;
+
+    App.state.currentSet = session.currentSet;
+    App.state.idx = session.idx;
+    App.state.answers = session.answers;
+    App.state.results = session.results;
+    App.state.startTime = session.startTime;
+    App.state.endTime = null;
+
+    App.render.renderQuestion();
+  };
+
+  const addToHistory = () => {
+    const { startTime, endTime, answers } = App.state;
+    const answered = answers.filter((a) => a !== null);
+    const correct = answered.filter((a) => a.correct).length;
+    const wrong = answered.filter((a) => !a.correct).length;
+    const skipped = answers.length - answered.length;
+
+    const entry = {
+      date: new Date().toISOString(),
+      duration: endTime - startTime,
+      total: answers.length,
+      correct,
+      wrong,
+      skipped,
+    };
+
+    const history = App.utils.storage.get("history") || [];
+    history.unshift(entry);
+    App.utils.storage.set("history", history.slice(0, 50)); // Guardar últimos 50
+    App.render.renderHistoryTable();
+  };
+
+  const clearHistory = () => {
+    App.utils.storage.remove("history");
+    App.render.renderHistoryTable();
+  };
+
   App.actions = {
     fillTopicsSelect,
     startTest,
@@ -170,5 +228,10 @@
     exitToSetup,
     reviewWrongQuestions,
     viewCorrectionFromSummary,
+    saveCurrentState,
+    clearCurrentState,
+    loadSession,
+    addToHistory,
+    clearHistory,
   };
 })();
