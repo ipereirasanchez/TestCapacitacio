@@ -1,36 +1,158 @@
 <!doctype html>
 <html lang="es">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Test</title>
   <link rel="manifest" href="manifest.json">
   <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 0; background:#f6f7fb; }
-    .wrap { max-width: 900px; margin: 0 auto; padding: 16px; }
-    .card { background:#fff; border:1px solid #e6e6e6; border-radius: 14px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.04); }
-    h1,h2,h3 { margin: 0 0 12px 0; }
-    .row { display:flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-    .row > * { flex: 1; min-width: 220px; }
-    label { font-weight: 600; display:block; margin-bottom: 6px; }
-    select, input { width: 100%; padding: 10px; border-radius: 10px; border:1px solid #d8d8d8; }
-    button { padding: 10px 12px; border-radius: 12px; border: 1px solid #d8d8d8; background:#fff; cursor:pointer; }
-    button.primary { background:#2d6cdf; color:#fff; border-color:#2d6cdf; }
-    button.danger { background:#e5484d; color:#fff; border-color:#e5484d; }
-    button.success { background:#2e7d32; color:#fff; border-color:#2e7d32; }
-    button.info { background:#0288d1; color:#fff; border-color:#0288d1; }
-    .muted { color:#666; }
-    .hidden { display:none; }
-    .options { margin-top: 12px; display:flex; flex-direction: column; gap: 10px; }
-    .opt { border:1px solid #ddd; border-radius: 12px; padding: 10px; display:flex; gap: 10px; align-items: flex-start; }
-    .opt input { width: 18px; height: 18px; margin-top: 2px; }
-    .opt.correct { background:#eaffea; border-color:#2e7d32; }
-    .opt.wrong { background:#ffecec; border-color:#b71c1c; }
-    .hint { margin-top: 12px; padding: 10px; border:1px dashed #bbb; border-radius: 12px; background:#fafafa; }
-    .topline { display:flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-    .code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color:#555; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      margin: 0;
+      background: #f6f7fb;
+    }
+
+    .wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #e6e6e6;
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, .04);
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0 0 12px 0;
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .row>* {
+      flex: 1;
+      min-width: 220px;
+    }
+
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    select,
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d8d8d8;
+    }
+
+    button {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid #d8d8d8;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    button.primary {
+      background: #2d6cdf;
+      color: #fff;
+      border-color: #2d6cdf;
+    }
+
+    button.danger {
+      background: #e5484d;
+      color: #fff;
+      border-color: #e5484d;
+    }
+
+    button.success {
+      background: #2e7d32;
+      color: #fff;
+      border-color: #2e7d32;
+    }
+
+    button.info {
+      background: #0288d1;
+      color: #fff;
+      border-color: #0288d1;
+    }
+
+    .muted {
+      color: #666;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .options {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .opt {
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 10px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .opt input {
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+    }
+
+    .opt.correct {
+      background: #eaffea;
+      border-color: #2e7d32;
+    }
+
+    .opt.wrong {
+      background: #ffecec;
+      border-color: #b71c1c;
+    }
+
+    .hint {
+      margin-top: 12px;
+      padding: 10px;
+      border: 1px dashed #bbb;
+      border-radius: 12px;
+      background: #fafafa;
+    }
+
+    .topline {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      color: #555;
+    }
   </style>
 </head>
+
 <body>
   <div class="wrap">
     <div class="card">
@@ -53,7 +175,7 @@
 
         <div id="nWrap">
           <label for="n">Número de preguntas (Modo 1)</label>
-          <input id="n" type="number" min="1" value="20"/>
+          <input id="n" type="number" min="1" value="20" />
         </div>
       </div>
 
@@ -86,7 +208,12 @@
       <div class="row" style="margin-top:12px;">
         <button class="info" id="hintBtn">Pista</button>
         <button class="primary" id="applyBtn">Aplicar selección</button>
+        <button id="skipBtn">Siguiente sin contestar</button>
         <button class="danger" id="exitBtn1">Salir del test</button>
+      </div>
+      <div class="row" style="margin-bottom:12px;">
+        <label for="jumpSelect">Ir a la pregunta</label>
+        <select id="jumpSelect"></select>
       </div>
 
       <div id="hintBox" class="hint hidden"></div>
@@ -108,8 +235,43 @@
         <button class="danger" id="exitBtn2">Salir</button>
       </div>
     </div>
+    <!-- Pantalla: resumen -->
+    <!-- Pantalla: resumen -->
+    <div class="card hidden" id="screen-summary" style="margin-top:14px;">
+      <h2>Resumen del test</h2>
+
+      <p id="sumTime"></p>
+      <p id="sumCorrect"></p>
+      <p id="sumWrong"></p>
+      <p id="sumSkipped"></p>
+
+      <!-- Navegación por preguntas desde el resumen -->
+      <div style="margin-top:12px;">
+        <label for="sumJumpSelect">Revisar pregunta</label>
+        <select id="sumJumpSelect"></select>
+        <p class="muted" style="margin:8px 0 0 0;">
+          Verde = correcta, rojo = incorrecta, sin icono = sin responder.
+        </p>
+      </div>
+
+      <div class="row" style="margin-top:12px;">
+        <button class="info" id="sumViewBtn">Ver corrección</button>
+      </div>
+
+      <div class="row" style="margin-top:12px;">
+        <button class="info" id="reviewBtn">Repetir fallos</button>
+        <button class="danger" id="backBtn">Volver al menú</button>
+      </div>
+    </div>
   </div>
 
-  <script src="app.js"></script>
+  <script src="js/app.state.js"></script>
+  <script src="js/app.utils.js"></script>
+  <script src="js/app.dom.js"></script>
+  <script src="js/app.render.js"></script>
+  <script src="js/app.actions.js"></script>
+  <script src="js/app.events.js"></script>
+  <script src="js/app.init.js"></script>
 </body>
+
 </html>
