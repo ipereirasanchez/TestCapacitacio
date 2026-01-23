@@ -16,7 +16,14 @@
       if (el) el.classList.add("hidden");
     });
     const target = byId(screenId);
-    if (target) target.classList.remove("hidden");
+    if (target) {
+      target.classList.remove("hidden");
+      target.classList.add("fade-in");
+      // Forzar reinicio de animación si ya estaba
+      target.style.animation = 'none';
+      target.offsetHeight; /* trigger reflow */
+      target.style.animation = null;
+    }
   };
 
   App.dom = { byId, setHidden, show };

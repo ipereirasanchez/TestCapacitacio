@@ -6,158 +6,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Test</title>
   <link rel="manifest" href="manifest.json">
-  <style>
-    body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      margin: 0;
-      background: #f6f7fb;
-    }
-
-    .wrap {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 16px;
-    }
-
-    .card {
-      background: #fff;
-      border: 1px solid #e6e6e6;
-      border-radius: 14px;
-      padding: 16px;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, .04);
-    }
-
-    h1,
-    h2,
-    h3 {
-      margin: 0 0 12px 0;
-    }
-
-    .row {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .row>* {
-      flex: 1;
-      min-width: 220px;
-    }
-
-    label {
-      font-weight: 600;
-      display: block;
-      margin-bottom: 6px;
-    }
-
-    select,
-    input {
-      width: 100%;
-      padding: 10px;
-      border-radius: 10px;
-      border: 1px solid #d8d8d8;
-    }
-
-    button {
-      padding: 10px 12px;
-      border-radius: 12px;
-      border: 1px solid #d8d8d8;
-      background: #fff;
-      cursor: pointer;
-    }
-
-    button.primary {
-      background: #2d6cdf;
-      color: #fff;
-      border-color: #2d6cdf;
-    }
-
-    button.danger {
-      background: #e5484d;
-      color: #fff;
-      border-color: #e5484d;
-    }
-
-    button.success {
-      background: #2e7d32;
-      color: #fff;
-      border-color: #2e7d32;
-    }
-
-    button.info {
-      background: #0288d1;
-      color: #fff;
-      border-color: #0288d1;
-    }
-
-    .muted {
-      color: #666;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .options {
-      margin-top: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .opt {
-      border: 1px solid #ddd;
-      border-radius: 12px;
-      padding: 10px;
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-    }
-
-    .opt input {
-      width: 18px;
-      height: 18px;
-      margin-top: 2px;
-    }
-
-    .opt.correct {
-      background: #eaffea;
-      border-color: #2e7d32;
-    }
-
-    .opt.wrong {
-      background: #ffecec;
-      border-color: #b71c1c;
-    }
-
-    .hint {
-      margin-top: 12px;
-      padding: 10px;
-      border: 1px dashed #bbb;
-      border-radius: 12px;
-      background: #fafafa;
-    }
-
-    .topline {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .code {
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      color: #555;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
   <div class="wrap">
-    <div class="card">
-      <h1>Test</h1>
+    <div class="card" id="card-header">
+      <h1>Test Capacitació</h1>
       <p class="muted" id="status">Cargando banco de preguntas…</p>
+    </div>
+
+    <!-- Barra de progreso (visible durante el test) -->
+    <div id="prog-wrap" class="hidden">
+      <div class="progress-container">
+        <div id="pBar" class="progress-bar"></div>
+      </div>
     </div>
 
     <!-- Pantalla: configuración -->
@@ -183,6 +46,13 @@
         <label for="topics">Temas (Ctrl/⌘ para multi-selección)</label>
         <select id="topics" multiple size="8"></select>
         <p class="muted" style="margin:8px 0 0 0;">En modo “200 de todo” esto se ignora.</p>
+      </div>
+
+      <div style="margin-top:12px;">
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500;">
+          <input type="checkbox" id="examMode" style="width: auto; margin: 0;">
+          <span><b>Modo Examen</b> (corrección solo al final)</span>
+        </label>
       </div>
 
       <div class="row" style="margin-top:12px;">
@@ -222,6 +92,7 @@
         <button class="info" id="hintBtn">Pista</button>
         <button class="primary" id="applyBtn">Aplicar selección</button>
         <button id="skipBtn">Siguiente sin contestar</button>
+        <button class="success finish-test-btn">Finalizar test</button>
         <button class="danger" id="exitBtn1">Salir del test</button>
       </div>
       <div class="row" style="margin-bottom:12px;">
@@ -245,8 +116,10 @@
 
       <div class="row" style="margin-top:12px;">
         <button class="success" id="nextBtn">Siguiente pregunta</button>
+        <button class="success finish-test-btn">Finalizar test</button>
         <button class="danger" id="exitBtn2">Salir</button>
       </div>
+      <div id="fMsg" class="hint hidden"></div>
     </div>
     <!-- Pantalla: resumen -->
     <!-- Pantalla: resumen -->

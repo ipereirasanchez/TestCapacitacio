@@ -17,6 +17,7 @@
 
     startTime: null,
     endTime: null,
+    isExamMode: false,
   };
 })();
 

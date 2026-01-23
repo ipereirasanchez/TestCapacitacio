@@ -20,6 +20,9 @@
       const a = answers[i]; // null | {selected, correct}
       if (!a) {
         opt.textContent = `Pregunta ${i + 1} — sin responder`;
+      } else if (App.state.isExamMode) {
+        opt.textContent = `Pregunta ${i + 1} — Contestada`;
+        opt.style.color = "var(--primary)";
       } else if (a.correct) {
         opt.textContent = `Pregunta ${i + 1} — ✅`;
         opt.style.color = "green";
@@ -44,6 +47,18 @@
     byId("qTitle").textContent = `Pregunta — ${q.topic}`;
     byId("qMeta").innerHTML = q.code ? `<span class="code">COD: ${q.code}</span>` : "";
     byId("qCounter").textContent = `${idx + 1} / ${currentSet.length}`;
+
+    // Ocultar pista en modo examen
+    setHidden(byId("hintBtn"), App.state.isExamMode);
+
+    // Actualizar barra de progreso
+    const progWrap = byId("prog-wrap");
+    const pBar = byId("pBar");
+    if (progWrap && pBar) {
+      setHidden(progWrap, false);
+      const percent = ((idx + 1) / currentSet.length) * 100;
+      pBar.style.width = `${percent}%`;
+    }
 
     renderJumpSelect("jumpSelect");
 
@@ -75,6 +90,7 @@
 
     setHidden(byId("hintBox"), true);
     setHidden(byId("qMsg"), true);
+    setHidden(byId("fMsg"), true);
 
     show("screen-question");
   };
@@ -83,6 +99,9 @@
     const { currentSet, idx, answers } = App.state;
     const q = currentSet[idx];
     if (!q) return;
+
+    setHidden(byId("qMsg"), true);
+    setHidden(byId("fMsg"), true);
 
     const saved = answers[idx];
     if (!saved) return; // renderFeedback debe venir tras "Aplicar"
@@ -146,6 +165,9 @@
     if (byId("sumJumpSelect")) {
       renderJumpSelect("sumJumpSelect");
     }
+
+    // Ocultar barra de progreso al terminar
+    setHidden(byId("prog-wrap"), true);
 
     if (!currentSet.length) return;
 

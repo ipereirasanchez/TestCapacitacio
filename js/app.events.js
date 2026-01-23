@@ -65,6 +65,9 @@
     const sumViewBtn = byId("sumViewBtn");
     if (sumViewBtn) sumViewBtn.addEventListener("click", App.actions.viewCorrectionFromSummary);
 
+    const finishBtns = document.querySelectorAll(".finish-test-btn");
+    finishBtns.forEach(btn => btn.addEventListener("click", App.actions.finishTest));
+
     const resumeBtn = byId("resumeBtn");
     if (resumeBtn) resumeBtn.addEventListener("click", App.actions.loadSession);
 

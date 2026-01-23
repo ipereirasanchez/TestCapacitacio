@@ -65,6 +65,7 @@
 
     App.state.startTime = Date.now();
     App.state.endTime = null;
+    App.state.isExamMode = byId("examMode")?.checked || false;
 
     setHidden(byId("setupMsg"), true);
     saveCurrentState();
@@ -77,9 +78,7 @@
     if (!q) return;
 
     if (!userSelected) {
-      const qMsg = byId("qMsg");
-      if (qMsg) qMsg.innerHTML = "<b>Selecciona una respuesta antes de aplicar.</b>";
-      setHidden(byId("qMsg"), false);
+      showTestMsg("<b>Selecciona una respuesta antes de aplicar.</b>");
       return;
     }
 
@@ -89,29 +88,53 @@
     App.state.results[idx] = { question: q, user: userSelected, correct: isCorrect };
 
     saveCurrentState();
-    App.render.renderFeedback();
+    if (App.state.isExamMode) {
+      nextQuestion();
+    } else {
+      App.render.renderFeedback();
+    }
+  };
+
+  const showTestMsg = (html) => {
+    const qMsg = byId("qMsg");
+    const fMsg = byId("fMsg");
+    if (qMsg) { qMsg.innerHTML = html; setHidden(qMsg, false); }
+    if (fMsg) { fMsg.innerHTML = html; setHidden(fMsg, false); }
   };
 
   const nextQuestion = () => {
     if (App.state.idx < App.state.currentSet.length - 1) {
       App.state.idx += 1;
+      saveCurrentState();
       App.render.renderQuestion();
     } else {
-      App.state.endTime = Date.now();
-      clearCurrentState();
-      addToHistory();
-      App.render.renderSummary();
+      showTestMsg("<b>Estás en la última pregunta.</b> Usa el botón 'Finalizar test' para terminar.");
     }
   };
 
   const skipQuestion = () => {
     if (App.state.idx < App.state.currentSet.length - 1) {
       App.state.idx += 1;
+      saveCurrentState();
       App.render.renderQuestion();
     } else {
-      App.state.endTime = Date.now();
-      App.render.renderSummary();
+      showTestMsg("<b>Estás en la última pregunta.</b> Usa el botón 'Finalizar test' para terminar.");
     }
+  };
+
+  const finishTest = () => {
+    const { answers, currentSet } = App.state;
+    const answeredCount = answers.filter(a => a !== null).length;
+
+    if (answeredCount < currentSet.length) {
+      showTestMsg(`<b>Faltan ${currentSet.length - answeredCount} preguntas por responder.</b> Debes contestarlas todas para poder finalizar.`);
+      return;
+    }
+
+    App.state.endTime = Date.now();
+    clearCurrentState();
+    addToHistory();
+    App.render.renderSummary();
   };
 
   const jumpToQuestion = (newIndex) => {
@@ -127,6 +150,7 @@
     App.state.idx = 0;
     App.state.userSelected = null;
     setHidden(byId("setupMsg"), true);
+    setHidden(byId("prog-wrap"), true);
     clearCurrentState();
     App.render.renderHistoryTable();
     show("screen-setup");
@@ -168,9 +192,9 @@
   };
 
   const saveCurrentState = () => {
-    const { currentSet, idx, answers, results, startTime } = App.state;
+    const { currentSet, idx, answers, results, startTime, isExamMode } = App.state;
     if (!currentSet || currentSet.length === 0) return;
-    App.utils.storage.set("session", { currentSet, idx, answers, results, startTime });
+    App.utils.storage.set("session", { currentSet, idx, answers, results, startTime, isExamMode });
   };
 
   const clearCurrentState = () => {
@@ -186,6 +210,7 @@
     App.state.answers = session.answers;
     App.state.results = session.results;
     App.state.startTime = session.startTime;
+    App.state.isExamMode = session.isExamMode || false;
     App.state.endTime = null;
 
     App.render.renderQuestion();
@@ -233,5 +258,6 @@
     loadSession,
     addToHistory,
     clearHistory,
+    finishTest,
   };
 })();
