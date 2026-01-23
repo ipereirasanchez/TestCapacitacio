@@ -60,6 +60,29 @@
     const resumeBtn = byId("resumeBtn");
     if (resumeBtn) resumeBtn.addEventListener("click", App.actions.loadSession);
 
+    // Dashboard
+    const btnDashNew = byId("btnDashNew");
+    if (btnDashNew) btnDashNew.addEventListener("click", App.actions.goToSetup);
+
+    const btnDashResume = byId("btnDashResume");
+    if (btnDashResume) btnDashResume.addEventListener("click", App.actions.loadSession);
+
+    const btnDashExam = byId("btnDashExam");
+    if (btnDashExam) btnDashExam.addEventListener("click", App.actions.startQuickExam);
+
+    const btnDashHistory = byId("btnDashHistory");
+    if (btnDashHistory) btnDashHistory.addEventListener("click", App.actions.goToHistory);
+
+    // Header & Back Buttons
+    const homeLink = byId("homeLink");
+    if (homeLink) homeLink.addEventListener("click", App.actions.initDashboard);
+
+    const setupBackBtn = byId("setupBackBtn");
+    if (setupBackBtn) setupBackBtn.addEventListener("click", App.actions.initDashboard);
+
+    const historyBackBtn = byId("historyBackBtn");
+    if (historyBackBtn) historyBackBtn.addEventListener("click", App.actions.initDashboard);
+
     const clearHistoryBtn = byId("clearHistoryBtn");
     if (clearHistoryBtn) clearHistoryBtn.addEventListener("click", App.actions.clearHistory);
   };

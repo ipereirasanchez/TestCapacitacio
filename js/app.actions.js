@@ -26,6 +26,48 @@
     if (sel.options.length > 0) sel.options[0].selected = true;
   };
 
+  /* ---------- Dashboard Navigation ---------- */
+  const initDashboard = () => {
+    // Check session for Resume
+    const hasSession = !!App.utils.storage.get("session");
+    const resumeCard = byId("btnDashResume");
+    setHidden(resumeCard, !hasSession);
+
+    // Reset UI
+    setHidden(byId("screen-home"), false);
+    setHidden(byId("screen-setup"), true);
+    setHidden(byId("screen-question"), true);
+    setHidden(byId("screen-summary"), true);
+    setHidden(byId("screen-history"), true);
+    setHidden(byId("bottomNav"), true);
+    setHidden(byId("homeLink"), true); // Home link hidden on home
+    setHidden(byId("exitLink"), true);
+
+    App.state.idx = 0;
+  };
+
+  const goToSetup = () => {
+    setHidden(byId("screen-home"), true);
+    setHidden(byId("screen-setup"), false);
+    setHidden(byId("homeLink"), false); // Can go home from setup
+  };
+
+  const goToHistory = () => {
+    setHidden(byId("screen-home"), true);
+    setHidden(byId("screen-history"), false);
+    setHidden(byId("homeLink"), false);
+    App.render.renderHistoryTable();
+  };
+
+  const startQuickExam = () => {
+    // Modo Examen Rápido: 20 random de todo, exam mode ON
+    if (byId("mode")) byId("mode").value = "all200";
+    if (byId("examMode")) byId("examMode").checked = true;
+    // Simular submit
+    startTest();
+  };
+
+  /* ---------- Actions ---------- */
   const getSelectedTopics = () => {
     const sel = byId("topics");
     if (!sel) return [];
@@ -67,8 +109,13 @@
     App.state.endTime = null;
     App.state.isExamMode = byId("examMode")?.checked || false;
 
-    setHidden(byId("setupMsg"), true);
     saveCurrentState();
+
+    // UI Update
+    setHidden(byId("screen-setup"), true);
+    setHidden(byId("screen-home"), true);
+    setHidden(byId("exitLink"), false); // Enable exit
+    setHidden(byId("homeLink"), true); // No home loop during test
     App.render.renderQuestion();
   };
 
@@ -104,9 +151,8 @@
 
   const showTestMsg = (html) => {
     const qMsg = byId("qMsg");
-    const fMsg = byId("fMsg");
     if (qMsg) { qMsg.innerHTML = html; setHidden(qMsg, false); }
-    if (fMsg) { fMsg.innerHTML = html; setHidden(fMsg, false); }
+    // fMsg is deprecated in new layout but kept safe
   };
 
   const nextQuestion = () => {
@@ -154,15 +200,8 @@
   };
 
   const exitToSetup = () => {
-    App.state.currentSet = [];
-    App.state.idx = 0;
-    App.state.userSelected = null;
-    setHidden(byId("setupMsg"), true);
-    setHidden(byId("prog-wrap"), true);
-    setHidden(byId("bottomNav"), true); // Hide nav
-    clearCurrentState();
-    App.render.renderHistoryTable();
-    show("screen-setup");
+    // Now mostly used as "Exit to Dashboard"
+    initDashboard();
   };
 
   const reviewWrongQuestions = () => {
@@ -190,14 +229,7 @@
   };
 
   const viewCorrectionFromSummary = () => {
-    const sel = byId("sumJumpSelect");
-    if (!sel) return;
-
-    const i = Number(sel.value);
-    if (Number.isNaN(i)) return;
-
-    App.state.idx = i;
-    App.render.renderFeedback();
+    // Deprecated? Summary now integrated
   };
 
   const saveCurrentState = () => {
@@ -221,6 +253,12 @@
     App.state.startTime = session.startTime;
     App.state.isExamMode = session.isExamMode || false;
     App.state.endTime = null;
+
+    // UI Update for Test
+    setHidden(byId("screen-home"), true);
+    setHidden(byId("screen-setup"), true);
+    setHidden(byId("homeLink"), true);
+    setHidden(byId("exitLink"), false);
 
     App.render.renderQuestion();
   };
@@ -261,12 +299,15 @@
     jumpToQuestion,
     exitToSetup,
     reviewWrongQuestions,
-    viewCorrectionFromSummary,
     saveCurrentState,
     clearCurrentState,
     loadSession,
     addToHistory,
     clearHistory,
     finishTest,
+    initDashboard,
+    goToSetup,
+    goToHistory,
+    startQuickExam
   };
 })();

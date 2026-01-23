@@ -14,10 +14,17 @@
     <!-- Header -->
     <div class="card" id="card-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
       <div>
-        <h1>Test Capacitació</h1>
-        <p class="muted" id="status">Cargando banco de preguntas…</p>
+        <h1 style="font-size: 1.5rem; margin:0;">Test Capacitació</h1>
+        <p class="muted hidden" id="status">Cargando…</p>
       </div>
       <div class="top-bar-actions">
+        <button class="icon-btn hidden" id="homeLink" title="Ir al Inicio">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <polyline points="9 22 9 12 15 12 15 22" />
+          </svg>
+        </button>
         <button class="icon-btn hidden" id="exitLink" title="Salir del test">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -25,6 +32,67 @@
             <path d="m6 6 12 12" />
           </svg>
         </button>
+      </div>
+    </div>
+
+    <!-- Screen: Home Dashboard -->
+    <div id="screen-home">
+      <div class="hero-section" style="text-align:center; padding: 20px 0; margin-bottom: 20px;">
+        <h2 style="font-size: 2rem; margin-bottom: 8px;">Bienvenido</h2>
+        <p class="muted">Selecciona una opción para empezar.</p>
+      </div>
+
+      <div class="dashboard-grid">
+        <!-- Card: New Test -->
+        <div class="dash-card" id="btnDashNew">
+          <div class="dash-icon" style="background: #eef2ff; color: var(--primary);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+            </svg>
+          </div>
+          <h3>Nuevo Test</h3>
+          <p>Configura temas y preguntas</p>
+        </div>
+
+        <!-- Card: Resume (Hidden by default) -->
+        <div class="dash-card hidden" id="btnDashResume">
+          <div class="dash-icon" style="background: #ecfdf5; color: var(--success);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+          </div>
+          <h3>Reanudar</h3>
+          <p>Continuar test previo</p>
+        </div>
+
+        <!-- Card: Quick Exam (20 Random) -->
+        <div class="dash-card" id="btnDashExam">
+          <div class="dash-icon" style="background: #fff7ed; color: #ea580c;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+          </div>
+          <h3>Examen Rápido</h3>
+          <p>20 preguntas aleatorias</p>
+        </div>
+
+        <!-- Card: History -->
+        <div class="dash-card" id="btnDashHistory">
+          <div class="dash-icon" style="background: #f0f9ff; color: var(--info);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 3v18h18" />
+              <path d="m19 9-5 5-4-4-3 3" />
+            </svg>
+          </div>
+          <h3>Historial</h3>
+          <p>Ver mis resultados</p>
+        </div>
       </div>
     </div>
 
@@ -36,8 +104,16 @@
     </div>
 
     <!-- Pantalla: configuración -->
-    <div class="card" id="screen-setup" style="margin-top:14px;">
-      <h2>Configuración</h2>
+    <div class="card hidden" id="screen-setup" style="margin-top:14px;">
+      <div style="display:flex; gap:12px; align-items:center; margin-bottom:16px;">
+        <button class="icon-btn" id="setupBackBtn" style="padding:4px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6" />
+          </svg>
+        </button>
+        <h2 style="margin:0">Configuración</h2>
+      </div>
 
       <div class="row">
         <div>
@@ -76,8 +152,14 @@
     </div>
 
     <!-- Pantalla: historial -->
-    <div class="card" id="screen-history" style="margin-top:14px;">
+    <div class="card hidden" id="screen-history" style="margin-top:14px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <button class="icon-btn" id="historyBackBtn" style="padding:4px; margin-right:8px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6" />
+          </svg>
+        </button>
         <h2 style="margin:0;">Historial</h2>
         <button id="clearHistoryBtn" class="danger" style="padding: 6px 12px; font-size: 0.8em;">Borrar</button>
       </div>
