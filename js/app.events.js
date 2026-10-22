@@ -9,8 +9,16 @@
 
     const modeSel = byId("mode");
     if (modeSel) modeSel.addEventListener("change", (e) => {
-      App.dom.setHidden(byId("nWrap"), e.target.value === "all200");
+      App.dom.setHidden(byId("nWrap"), e.target.value === "all");
     });
+
+    const sourceSel = byId("source");
+    if (sourceSel) sourceSel.addEventListener("change", (e) => {
+      if (e.target.value === "fallos") App.actions.selectAllTopics();
+    });
+
+    const kindSel = byId("bankKind");
+    if (kindSel) kindSel.addEventListener("change", (e) => App.actions.applySetupKind(e.target.value));
 
     // Question Actions (Delegate if needed, but IDs are static now)
     // We use a shared Main Action Button now in renderQuestion, but binding locally 
@@ -18,7 +26,7 @@
     // So we don't need to bind it here.
 
     const finishBtn = byId("finishBtn");
-    if (finishBtn) finishBtn.addEventListener("click", App.actions.finishTest);
+    if (finishBtn) finishBtn.addEventListener("click", () => App.actions.finishTest());
 
     // Exit Buttons
     const exitBtn1 = byId("exitBtn1"); // Legacy support if element remains
@@ -62,7 +70,16 @@
 
     // Dashboard
     const btnDashNew = byId("btnDashNew");
-    if (btnDashNew) btnDashNew.addEventListener("click", App.actions.goToSetup);
+    if (btnDashNew) btnDashNew.addEventListener("click", () => App.actions.goToSetup({ kind: "test", source: "all" }));
+
+    const btnDashCasos = byId("btnDashCasos");
+    if (btnDashCasos) btnDashCasos.addEventListener("click", () => App.actions.goToSetup({ kind: "caso", source: "all", n: 4 }));
+
+    const btnDashSimulacro = byId("btnDashSimulacro");
+    if (btnDashSimulacro) btnDashSimulacro.addEventListener("click", App.actions.startSimulacro);
+
+    const btnDashFallos = byId("btnDashFallos");
+    if (btnDashFallos) btnDashFallos.addEventListener("click", () => App.actions.goToSetup({ source: "fallos" }));
 
     const btnDashResume = byId("btnDashResume");
     if (btnDashResume) btnDashResume.addEventListener("click", App.actions.loadSession);

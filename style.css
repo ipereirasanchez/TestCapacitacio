@@ -53,6 +53,12 @@ body {
     opacity: 0;
 }
 
+/* Regla genérica: cualquier elemento con .hidden desaparece
+   (la barra inferior se oculta deslizándose, ver .bottom-nav.hidden). */
+.hidden:not(.bottom-nav) {
+    display: none !important;
+}
+
 h1 {
     font-size: 1.875rem;
     font-weight: 700;
@@ -162,6 +168,63 @@ button.info {
     border-color: var(--info);
 }
 
+.summary-tiles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.score-box {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    text-align: center;
+    background: #f8fafc;
+    margin-bottom: 12px;
+}
+
+.score-main {
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.score-verdict {
+    margin-top: 4px;
+    font-weight: 600;
+}
+
+.score-verdict.pass {
+    color: var(--success);
+}
+
+.score-verdict.fail {
+    color: var(--danger);
+}
+
+table.stats {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+}
+
+table.stats th,
+table.stats td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+table.stats th {
+    border-bottom: 2px solid #eee;
+}
+
+table.stats td.num,
+table.stats th.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
 .muted {
     color: var(--text-muted);
     font-size: 0.875rem;
@@ -209,6 +272,29 @@ button.info {
 .opt:hover {
     border-color: var(--primary);
     background: #f5f3ff;
+}
+
+/* Alternativas de casos prácticos: contenido largo, radio alineado arriba */
+.opt.caso {
+    align-items: flex-start;
+}
+
+.opt.caso>span {
+    flex: 1;
+}
+
+.opt-items {
+    margin: 6px 0 0 0;
+    padding-left: 22px;
+    list-style: lower-alpha;
+}
+
+.opt-items li {
+    margin: 4px 0;
+}
+
+.scenario p {
+    margin: 0 0 10px 0;
 }
 
 .opt input[type="radio"] {
@@ -340,6 +426,18 @@ button.info {
     font-size: 0.9rem;
     color: var(--primary);
     transition: background 0.2s;
+}
+
+#navTimer {
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted, #64748b);
+    margin-top: 2px;
+}
+
+#navTimer.warn {
+    color: var(--danger);
+    font-weight: 700;
 }
 
 .nav-center:hover {
