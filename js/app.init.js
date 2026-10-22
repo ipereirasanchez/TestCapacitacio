@@ -8,9 +8,9 @@
 
     // 2) Cargar banco de preguntas
     try {
-      const url = new URL("questions.json", document.baseURI);
+      const url = new URL("data/preguntas.json", document.baseURI);
       const res = await fetch(url.toString(), { cache: "no-store" });
-      if (!res.ok) throw new Error(`HTTP ${res.status} al cargar questions.json`);
+      if (!res.ok) throw new Error(`HTTP ${res.status} al cargar data/preguntas.json`);
 
       App.state.BANK = await res.json();
 
@@ -27,7 +27,7 @@
     } catch (e) {
       console.error(e);
       const status = App.dom.byId("status");
-      if (status) status.textContent = "Error cargando questions.json. Asegúrate de que está en el mismo directorio.";
+      if (status) status.textContent = "Error cargando data/preguntas.json. Sirve la carpeta por HTTP (p. ej. python3 -m http.server).";
     }
   })();
 })();
