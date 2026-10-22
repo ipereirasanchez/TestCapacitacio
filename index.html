@@ -160,7 +160,7 @@
       <div class="row">
         <div>
           <label for="bankKind">Tipo</label>
-          <select id="bankKind">
+          <select id="bankKind" autocomplete="off">
             <option value="test">Preguntas tipo test</option>
             <option value="caso">Casos prácticos</option>
           </select>
@@ -168,7 +168,7 @@
 
         <div>
           <label for="source">Fuente</label>
-          <select id="source">
+          <select id="source" autocomplete="off">
             <option value="all">Todo el banco</option>
             <option value="fallos">Solo mis fallos</option>
           </select>
@@ -178,7 +178,7 @@
       <div class="row" style="margin-top:12px;">
         <div>
           <label for="mode">Modo</label>
-          <select id="mode">
+          <select id="mode" autocomplete="off">
             <option value="themes">Por temas</option>
             <option value="all">Examen completo</option>
           </select>
@@ -186,23 +186,23 @@
 
         <div id="nWrap">
           <label for="n" id="nLabel">Número de preguntas</label>
-          <input id="n" type="number" min="1" value="20" />
+          <input id="n" type="number" autocomplete="off" min="1" value="20" />
         </div>
       </div>
 
       <div style="margin-top:12px;">
         <label for="topics">Temas (Ctrl/⌘ para multi-selección)</label>
-        <select id="topics" multiple size="8"></select>
+        <select id="topics" autocomplete="off" multiple size="8"></select>
         <p class="muted" id="modeHint" style="margin:8px 0 0 0;">“Examen completo” toma 200 preguntas de todos los temas, como la prueba oficial.</p>
       </div>
 
       <div style="margin-top:12px; display:flex; flex-direction:column; gap:10px;">
         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500;">
-          <input type="checkbox" id="examMode" style="width: auto; margin: 0;">
+          <input type="checkbox" id="examMode" autocomplete="off" style="width: auto; margin: 0;">
           <span><b>Modo Examen</b> (corrección solo al final)</span>
         </label>
         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500;">
-          <input type="checkbox" id="timerMode" style="width: auto; margin: 0;">
+          <input type="checkbox" id="timerMode" autocomplete="off" style="width: auto; margin: 0;">
           <span><b>Cronómetro oficial</b> (2 horas; al acabar el tiempo se corrige)</span>
         </label>
       </div>

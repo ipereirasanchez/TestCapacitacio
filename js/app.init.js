@@ -3,6 +3,13 @@
   window.App = window.App || {};
 
   (async function init() {
+    // 0) Service worker para uso sin conexión (red primero, caché de respaldo)
+    if ("serviceWorker" in navigator) {
+      try {
+        navigator.serviceWorker.register(new URL("sw.js", document.baseURI).toString()).catch((e) => console.warn("SW:", e));
+      } catch (e) { console.warn("SW:", e); }
+    }
+
     // 1) Conectar eventos
     App.events.bindEvents();
 

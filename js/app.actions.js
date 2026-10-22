@@ -74,11 +74,8 @@
   // Ajusta el formulario de configuración al tipo elegido (temas, número por defecto, textos).
   const applySetupKind = async (kind) => {
     const isCaso = kind === "caso";
-    if (isCaso) {
-      try { await ensureCasosLoaded(); }
-      catch (e) { console.error(e); showSetupMsg("No se han podido cargar los casos prácticos."); return; }
-    }
-    fillTopicsSelect(kind);
+
+    // Ajustes síncronos primero: lo que el usuario toque después no se pisa.
     const nLabel = byId("nLabel");
     if (nLabel) nLabel.textContent = isCaso ? "Número de casos" : "Número de preguntas";
     const nEl = byId("n");
@@ -87,6 +84,18 @@
     if (hint) hint.textContent = isCaso
       ? "“Examen completo” toma 4 casos de todos los temas, como la prueba oficial."
       : "“Examen completo” toma 200 preguntas de todos los temas, como la prueba oficial.";
+
+    const startBtn = byId("startBtn");
+    if (isCaso && !App.state.CASOS.length) {
+      if (startBtn) startBtn.disabled = true;
+      fillTopicsSelect(kind); // vacío mientras carga
+      try { await ensureCasosLoaded(); }
+      catch (e) { console.error(e); showSetupMsg("No se han podido cargar los casos prácticos."); return; }
+      finally { if (startBtn) startBtn.disabled = false; }
+      // Si cambió de tipo mientras cargaba, no tocar su formulario.
+      if (byId("bankKind")?.value !== kind) return;
+    }
+    fillTopicsSelect(kind);
   };
 
   const showSetupMsg = (html) => {
@@ -105,9 +114,12 @@
     const srcEl = byId("source");
     if (preset.kind && kindEl) kindEl.value = preset.kind;
     if (preset.source && srcEl) srcEl.value = preset.source;
-    await applySetupKind(kindEl ? kindEl.value : "test");
+    // La parte síncrona de applySetupKind corre ya; el preset de n va antes de
+    // esperar la carga para no pisar lo que el usuario escriba mientras tanto.
+    const loading = applySetupKind(kindEl ? kindEl.value : "test");
     if (preset.n && byId("n")) byId("n").value = preset.n;
     setHidden(byId("nWrap"), byId("mode")?.value === "all");
+    await loading;
   };
 
   const goToHistory = () => {
