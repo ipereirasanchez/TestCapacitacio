@@ -26,6 +26,25 @@
     if (sel.options.length > 0) sel.options[0].selected = true;
   };
 
+  /* ---------- Bancos ---------- */
+  let casosPromise = null;
+  // Carga data/casos.json una sola vez; devuelve siempre la misma promesa.
+  const ensureCasosLoaded = () => {
+    if (App.state.CASOS.length) return Promise.resolve();
+    if (!casosPromise) {
+      casosPromise = fetch(new URL("data/casos.json", document.baseURI).toString(), { cache: "no-store" })
+        .then((res) => {
+          if (!res.ok) throw new Error(`HTTP ${res.status} al cargar data/casos.json`);
+          return res.json();
+        })
+        .then((data) => { App.state.CASOS = data; })
+        .catch((e) => { casosPromise = null; throw e; });
+    }
+    return casosPromise;
+  };
+
+  const bankFor = (kind) => (kind === "caso" ? App.state.CASOS : App.state.BANK);
+
   /* ---------- Dashboard Navigation ---------- */
   const initDashboard = () => {
     // Check session for Resume
@@ -291,6 +310,8 @@
   };
 
   App.actions = {
+    ensureCasosLoaded,
+    bankFor,
     fillTopicsSelect,
     startTest,
     applyAnswer,

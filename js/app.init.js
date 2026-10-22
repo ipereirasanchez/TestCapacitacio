@@ -6,16 +6,27 @@
     // 1) Conectar eventos
     App.events.bindEvents();
 
-    // 2) Cargar banco de preguntas
+    // 2) Cargar banco de preguntas y metadatos (los casos se cargan al usarlos)
     try {
-      const url = new URL("data/preguntas.json", document.baseURI);
-      const res = await fetch(url.toString(), { cache: "no-store" });
-      if (!res.ok) throw new Error(`HTTP ${res.status} al cargar data/preguntas.json`);
-
-      App.state.BANK = await res.json();
+      const load = async (file, required) => {
+        const url = new URL(file, document.baseURI);
+        const res = await fetch(url.toString(), { cache: "no-store" });
+        if (!res.ok) {
+          if (required) throw new Error(`HTTP ${res.status} al cargar ${file}`);
+          return null;
+        }
+        return res.json();
+      };
+      const [bank, meta] = await Promise.all([
+        load("data/preguntas.json", true),
+        load("data/meta.json", false).catch(() => null),
+      ]);
+      App.state.BANK = bank;
+      App.state.META = meta;
 
       const status = App.dom.byId("status");
       if (status) status.textContent = `Banco cargado: ${App.state.BANK.length} preguntas.`;
+      App.render.renderBankMeta();
 
       App.actions.fillTopicsSelect();
       App.render.renderHistoryTable();

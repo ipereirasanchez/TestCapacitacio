@@ -282,7 +282,19 @@
     container.innerHTML = html;
   };
 
+  /* ---------- Render Bank Meta (pie de inicio) ---------- */
+  const renderBankMeta = () => {
+    const el = byId("bankMeta");
+    const m = App.state.META;
+    if (!el) return;
+    if (!m) { el.textContent = ""; return; }
+    const [y, mo, d] = (m.updated || "").split("-");
+    const date = y ? `${d}/${mo}/${y}` : "fecha desconocida";
+    el.textContent = `Banco oficial del ${date} · ${m.preguntas} preguntas · ${m.casos} casos prácticos`;
+  };
+
   App.render = {
+    renderBankMeta,
     renderQuestion,
     renderSummary,
     renderHistoryTable,
