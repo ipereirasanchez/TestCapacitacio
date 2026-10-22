@@ -12,6 +12,11 @@
       App.dom.setHidden(byId("nWrap"), e.target.value === "all");
     });
 
+    const sourceSel = byId("source");
+    if (sourceSel) sourceSel.addEventListener("change", (e) => {
+      if (e.target.value === "fallos") App.actions.selectAllTopics();
+    });
+
     const kindSel = byId("bankKind");
     if (kindSel) kindSel.addEventListener("change", (e) => App.actions.applySetupKind(e.target.value));
 

@@ -58,6 +58,7 @@
     setHidden(byId("screen-summary"), true);
     setHidden(byId("screen-history"), true);
     setHidden(byId("bottomNav"), true);
+    setHidden(byId("prog-wrap"), true);
     setHidden(byId("homeLink"), true); // Home link hidden on home
     setHidden(byId("exitLink"), true);
 
@@ -120,6 +121,21 @@
     if (preset.n && byId("n")) byId("n").value = preset.n;
     setHidden(byId("nWrap"), byId("mode")?.value === "all");
     await loading;
+    // Con "Solo mis fallos" se repasan todos los temas: seleccionar todos.
+    if (srcEl && srcEl.value === "fallos") selectAllTopics();
+  };
+
+  const selectAllTopics = () => {
+    const sel = byId("topics");
+    if (sel) Array.from(sel.options).forEach((o) => { o.selected = true; });
+  };
+
+  // Duración efectiva del test: con cronómetro nunca supera el límite
+  // (una sesión reanudada tras expirar no debe contar el tiempo de reloj).
+  const elapsedMs = () => {
+    const { startTime, endTime, timeLimitMs } = App.state;
+    const raw = (endTime || Date.now()) - (startTime || Date.now());
+    return timeLimitMs ? Math.min(raw, timeLimitMs) : raw;
   };
 
   const goToHistory = () => {
@@ -427,12 +443,12 @@
   };
 
   const addToHistory = () => {
-    const { startTime, endTime, answers, kind } = App.state;
+    const { answers, kind } = App.state;
     const sc = App.scoring.score(kind, answers);
 
     const entry = {
       date: new Date().toISOString(),
-      duration: endTime - startTime,
+      duration: elapsedMs(),
       kind,
       total: answers.length,
       correct: sc.correct,
@@ -477,6 +493,8 @@
     initDashboard,
     goToSetup,
     applySetupKind,
+    selectAllTopics,
+    elapsedMs,
     goToHistory,
     startQuickExam,
     startSimulacro,

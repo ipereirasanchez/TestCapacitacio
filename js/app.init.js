@@ -45,7 +45,10 @@
     } catch (e) {
       console.error(e);
       const status = App.dom.byId("status");
-      if (status) status.textContent = "Error cargando data/preguntas.json. Sirve la carpeta por HTTP (p. ej. python3 -m http.server).";
+      if (status) {
+        status.textContent = "Error cargando data/preguntas.json. Sirve la carpeta por HTTP (p. ej. python3 -m http.server).";
+        App.dom.setHidden(status, false);
+      }
     }
   })();
 })();

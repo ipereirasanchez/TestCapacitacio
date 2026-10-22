@@ -64,14 +64,15 @@ A test's `App.state.currentSet` holds either questions or cases; `App.state.kind
 ```json
 // data/preguntas.json entry
 { "topic": "A. Elementos de Derecho civil", "code": "1A01001", "question": "...",
-  "options": [{"key": "A", "text": "..."}, ...4], "answer": "B", "norma": "RD 1211/1990, art. 6" }
+  "options": [{"key": "A", "text": "..."}, ...4], "answer": "B", "norma": "RD 1211/1990, art. 6",
+  "referencia": "..." | null }
 // data/casos.json entry
 { "topic": "...", "code": "1A02001", "scenario": ["párrafo", ...],
   "options": [{"key": "A", "items": ["resp. a)", "resp. b)", "resp. c)"]}, ...8],
   "answer": "B", "norma": "...", "referencia": "..." | null }
 ```
 
-`answer` is an option key compared by string equality. `norma` doubles as hint and post-answer explanation; `referencia` (doctrinal reference, rare) is appended to the feedback. Text is injected with `innerHTML`, so the bank is trusted content.
+`answer` is an option key compared by string equality. `norma` doubles as hint and post-answer explanation; `referencia` (doctrinal reference: ~21 % of questions, ~8 % of cases) is appended to the feedback. Text is injected with `innerHTML`, so the bank is trusted content.
 
 ### Screens
 
@@ -105,4 +106,4 @@ Every way of starting a test goes through `App.actions.startTest(opts)`, which r
 
 ### Offline
 
-`sw.js` is a network-first, cache-fallback service worker for same-origin GETs (cache `tc-v1`). There is no precache or manual versioning: online always gets fresh files, offline gets the last copy. If you change caching strategy, remember the first page load is not yet controlled by the worker.
+`sw.js` precaches the app shell and the three data files at install (one `put` per file, failures tolerated) and then serves same-origin GETs network-first with cache fallback (cache `tc-v1`). The precache exists because the first page load is not controlled by the worker, and the spec promises offline use after a single visit. Add any new file to `PRECACHE`. No manual versioning: online always refreshes the cache.

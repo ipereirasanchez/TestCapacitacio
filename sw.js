@@ -1,11 +1,27 @@
-// sw.js — Service worker mínimo para uso sin conexión.
-// Estrategia "red primero, caché de respaldo" para todas las peticiones GET
-// del mismo origen: con red siempre se sirve la versión fresca (y se guarda),
-// sin red se sirve la última copia guardada. No hay precaché ni versionado
-// que mantener a mano.
+// sw.js — Service worker para uso sin conexión.
+// - En la instalación se precachea la app y los datos, así una sola visita
+//   basta para que funcione sin red (la primera carga de la página no pasa
+//   por el worker, por eso no se puede confiar solo en la caché de paso).
+// - En uso: "red primero, caché de respaldo" para todas las peticiones GET del
+//   mismo origen. Con red siempre se sirve la versión fresca (y se guarda).
 const CACHE = "tc-v1";
+const PRECACHE = [
+  "./", "index.html", "style.css", "manifest.json",
+  "js/app.state.js", "js/app.utils.js", "js/app.dom.js", "js/app.scoring.js",
+  "js/app.render.js", "js/app.actions.js", "js/app.events.js", "js/app.init.js",
+  "data/meta.json", "data/preguntas.json", "data/casos.json",
+];
 
-self.addEventListener("install", () => self.skipWaiting());
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE).then((c) =>
+      // Una a una: si falla un archivo no se pierde el resto.
+      Promise.all(PRECACHE.map((p) =>
+        fetch(p, { cache: "no-cache" }).then((r) => (r.ok ? c.put(p, r) : null)).catch(() => null)
+      ))
+    ).then(() => self.skipWaiting())
+  );
+});
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(

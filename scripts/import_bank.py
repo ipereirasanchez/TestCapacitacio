@@ -38,9 +38,10 @@ USER_AGENT = (
 )
 
 _RECORD_SPLIT = re.compile(r"(?m)^(?=COD:)")
-_PM_LABEL = re.compile(r"^(COD|PREGUNTA|SOLUCION|NORMA|[A-D]):\s?(.*)$")
+_PM_LABEL = re.compile(r"^(COD|PREGUNTA|SOLUCION|NORMA|REFERENCIA DOCTRINAL|[A-D]):\s?(.*)$")
 _CM_LABEL = re.compile(r"^(COD|PREGUNTA|SOLUCION|NORMA|REFERENCIA DOCTRINAL|RESPUESTA [A-H]):\s?(.*)$")
-_ITEM_PREFIX = re.compile(r"^[A-Z]\)\s*")
+_ITEM_PREFIX = re.compile(r"^(?:[A-Z]\)\s*)+")  # también prefijos doblados "B) B) ..."
+_STRAY_LABEL = re.compile(r"^respuesta [a-h]:\s*$", re.I)  # línea suelta "Respuesta G:" en el texto oficial
 
 
 def _records(text: str) -> list[str]:
@@ -71,6 +72,7 @@ def parse_preguntas(text: str, topic: str) -> list[dict]:
                 "options": options,
                 "answer": fields.get("SOLUCION", ""),
                 "norma": fields.get("NORMA", ""),
+                "referencia": fields.get("REFERENCIA DOCTRINAL") or None,
             }
         )
     return out
@@ -113,6 +115,8 @@ def parse_casos(text: str, topic: str) -> list[dict]:
             if section == "PREGUNTA":
                 scenario.append(s)
             elif section and section.startswith("RESPUESTA"):
+                if _STRAY_LABEL.match(s):
+                    continue
                 options[-1]["items"].append(_ITEM_PREFIX.sub("", s))
             elif section == "NORMA":
                 norma = (norma + " " + s).strip()
@@ -184,6 +188,15 @@ def main(argv: list[str] | None = None) -> int:
     pm_path, cm_path = _fetch(args.pm), _fetch(args.cm)
     preguntas = _parse_zip(pm_path, parse_preguntas, "pm")
     casos = _parse_zip(cm_path, parse_casos, "cm")
+
+    # Guarda: nunca sobrescribir el banco con un resultado vacío (ZIP renombrado, formato nuevo...).
+    if not preguntas or not casos:
+        print(
+            f"error: resultado vacío (preguntas: {len(preguntas)}, casos: {len(casos)}); "
+            "no se escribe nada. ¿Los ZIP contienen pm1A..pm1H.txt / cm1A..cm1H.txt?",
+            file=sys.stderr,
+        )
+        return 1
 
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)

@@ -247,9 +247,8 @@
     App.actions.stopTimer();
     setHidden(byId("bottomNav"), true); // Hide nav in summary 
 
-    const { startTime, endTime, answers, currentSet, kind } = App.state;
-    const end = endTime || Date.now();
-    const { minutes, seconds } = App.utils.formatDurationMs(end - startTime);
+    const { answers, currentSet, kind } = App.state;
+    const { minutes, seconds } = App.utils.formatDurationMs(App.actions.elapsedMs());
     const isCaso = kind === "caso";
 
     const sc = App.scoring.score(kind, answers);

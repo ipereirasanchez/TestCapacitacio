@@ -1,6 +1,8 @@
 import unittest
 
-from import_bank import parse_preguntas, parse_casos, date_from_zip_name, source_label
+import io, json, os, tempfile, zipfile
+
+from import_bank import parse_preguntas, parse_casos, date_from_zip_name, source_label, main
 
 PM_SAMPLE = """COD: 1A01001
 PREGUNTA: Si a una empresa de transportes le adeuda varias mensualidades de renta, ¿cómo debe proceder?
@@ -128,7 +130,71 @@ REFERENCIA DOCTRINAL: Código de buenas prácticas, IRU
 """
 
 
+PM_REF = """COD: 1B01005
+PREGUNTA: ¿Qué es el Derecho mercantil?
+A: Uno.
+B: Dos.
+C: Tres.
+D: Cuatro.
+SOLUCION: A
+NORMA: Código de Comercio, art. 1
+REFERENCIA DOCTRINAL: Derecho Mercantil, Rodrigo Uría, Editorial Marcial Pons
+"""
+
+CM_QUIRKS = """COD: 1F01029
+PREGUNTA:
+
+Enunciado breve.
+
+RESPUESTA A:
+A) Uno.
+B) Dos.
+
+RESPUESTA B:
+A) B) Prefijo doblado.
+B) Dos.
+
+RESPUESTA C:
+A) Uno.
+B) Dos.
+
+RESPUESTA D:
+A) Uno.
+B) Dos.
+
+RESPUESTA E:
+A) Uno.
+B) Dos.
+
+RESPUESTA F:
+A) Uno.
+B) Dos.
+
+RESPUESTA G:
+Respuesta G:
+A) Uno.
+B) Dos.
+
+RESPUESTA H:
+A) Uno.
+B) Dos.
+
+SOLUCION: RESPUESTA A
+
+NORMA: Norma X
+"""
+
+
 class ParsePreguntas(unittest.TestCase):
+    def test_referencia_doctrinal_is_split_from_norma(self):
+        q = parse_preguntas(PM_REF, "B. Elementos de Derecho mercantil")[0]
+        self.assertEqual(q["norma"], "Código de Comercio, art. 1")
+        self.assertEqual(q["referencia"], "Derecho Mercantil, Rodrigo Uría, Editorial Marcial Pons")
+
+    def test_referencia_is_none_when_absent(self):
+        q = parse_preguntas(PM_SAMPLE, "A. Elementos de Derecho civil")[0]
+        self.assertIsNone(q["referencia"])
+
     def test_basic_record(self):
         qs = parse_preguntas(PM_SAMPLE, "A. Elementos de Derecho civil")
         self.assertEqual(len(qs), 2)
@@ -172,9 +238,41 @@ class ParseCasos(unittest.TestCase):
         self.assertEqual(c["answer"], "F")
         self.assertEqual(c["referencia"], "Código de buenas prácticas, IRU")
 
+    def test_source_quirks_doubled_prefix_and_stray_label_line(self):
+        c = parse_casos(CM_QUIRKS, "F. Acceso a los mercados")[0]
+        self.assertEqual(c["options"][1]["items"][0], "Prefijo doblado.")
+        self.assertEqual(c["options"][6]["items"], ["Uno.", "Dos."])
+
     def test_duplicate_code_keeps_first(self):
         cs = parse_casos(CM_SAMPLE + "\n" + CM_SAMPLE, "A. Elementos de Derecho civil")
         self.assertEqual(len(cs), 1)
+
+
+class MainGuard(unittest.TestCase):
+    def _zip(self, path, files):
+        with zipfile.ZipFile(path, "w") as zf:
+            for name, text in files.items():
+                zf.writestr(name, text)
+
+    def test_main_refuses_to_write_when_a_bank_parses_empty(self):
+        with tempfile.TemporaryDirectory() as d:
+            pm = os.path.join(d, "pm_260326.zip"); cm = os.path.join(d, "cm_260326.zip")
+            self._zip(pm, {"pm1A.txt": PM_SAMPLE})
+            self._zip(cm, {"OTRO.txt": CM_SAMPLE})  # nombre no reconocido → 0 casos
+            out = os.path.join(d, "out")
+            rc = main(["--pm", pm, "--cm", cm, "--out", out])
+            self.assertEqual(rc, 1)
+            self.assertFalse(os.path.exists(os.path.join(out, "preguntas.json")))
+
+    def test_main_writes_all_three_files(self):
+        with tempfile.TemporaryDirectory() as d:
+            pm = os.path.join(d, "pm_260326.zip"); cm = os.path.join(d, "cm_260326.zip")
+            self._zip(pm, {"pm1A.txt": PM_SAMPLE})
+            self._zip(cm, {"cm1A.txt": CM_SAMPLE})
+            out = os.path.join(d, "out")
+            self.assertEqual(main(["--pm", pm, "--cm", cm, "--out", out]), 0)
+            meta = json.load(open(os.path.join(out, "meta.json"), encoding="utf-8"))
+            self.assertEqual((meta["preguntas"], meta["casos"], meta["updated"]), (2, 1, "2026-03-26"))
 
 
 class Misc(unittest.TestCase):
