@@ -21,7 +21,7 @@
     // So we don't need to bind it here.
 
     const finishBtn = byId("finishBtn");
-    if (finishBtn) finishBtn.addEventListener("click", App.actions.finishTest);
+    if (finishBtn) finishBtn.addEventListener("click", () => App.actions.finishTest());
 
     // Exit Buttons
     const exitBtn1 = byId("exitBtn1"); // Legacy support if element remains

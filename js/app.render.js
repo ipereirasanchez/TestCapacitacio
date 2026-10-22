@@ -32,7 +32,7 @@
         setHidden(finishBtn, !App.state.isExamMode);
       } else {
         mainBtn.textContent = "Finalizar Test";
-        mainBtn.onclick = App.actions.finishTest;
+        mainBtn.onclick = () => App.actions.finishTest();
         setHidden(finishBtn, true); // Main button becomes Finish
       }
       mainBtn.className = "primary";
@@ -134,8 +134,23 @@
 
     show("screen-question");
 
-    // Actualizar Navegación Inferior
+    // Actualizar Navegación Inferior y cronómetro
     renderBottomNav();
+    App.actions.startTimer();
+  };
+
+  /* ---------- Render Timer (cuenta atrás en la barra inferior) ---------- */
+  const renderTimer = (remainingMs) => {
+    const el = byId("navTimer");
+    if (!el) return;
+    if (remainingMs === null || remainingMs === undefined) { setHidden(el, true); return; }
+    const total = Math.max(0, Math.floor(remainingMs / 1000));
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const s = total % 60;
+    el.textContent = `⏱ ${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    el.classList.toggle("warn", remainingMs < 5 * 60 * 1000);
+    setHidden(el, false);
   };
 
   /* ---------- Render Inline Feedback ---------- */
@@ -164,7 +179,7 @@
 
     const indicator = byId("navIndicator");
     indicator.textContent = `Pregunta ${App.state.idx + 1} / ${App.state.currentSet.length}`;
-    indicator.onclick = () => openNavGrid();
+    (byId("navCenter") || indicator).onclick = () => openNavGrid();
 
     const prevBtn = byId("navPrev");
     prevBtn.onclick = () => App.actions.jumpToQuestion(App.state.idx - 1);
@@ -227,6 +242,7 @@
 
   /* ---------- Render Summary ---------- */
   const renderSummary = () => {
+    App.actions.stopTimer();
     setHidden(byId("bottomNav"), true); // Hide nav in summary 
 
     const { startTime, endTime, answers, currentSet } = App.state;
@@ -309,6 +325,7 @@
   App.render = {
     renderBankMeta,
     renderQuestion,
+    renderTimer,
     renderSummary,
     renderHistoryTable,
     openNavGrid,

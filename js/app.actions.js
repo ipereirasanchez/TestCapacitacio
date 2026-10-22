@@ -45,6 +45,7 @@
 
   /* ---------- Dashboard Navigation ---------- */
   const initDashboard = () => {
+    stopTimer();
     // Check session for Resume
     const hasSession = !!App.utils.storage.get("session");
     const resumeCard = byId("btnDashResume");
@@ -257,19 +258,58 @@
     }
   };
 
-  const finishTest = () => {
+  // force === true salta la advertencia de preguntas en blanco (botón "Finalizar igualmente"
+  // o fin del cronómetro). Se compara con `true` para ignorar un `event` pasado por error.
+  const finishTest = (force = false) => {
     const { answers, currentSet } = App.state;
-    const answeredCount = answers.filter(a => a !== null).length;
+    const blank = answers.filter((a) => a === null).length;
+    const noun = App.state.kind === "caso" ? "casos" : "preguntas";
 
-    if (answeredCount < currentSet.length) {
-      showTestMsg(`<b>Faltan ${currentSet.length - answeredCount} preguntas por responder.</b> Debes contestarlas todas para poder finalizar.`);
+    if (blank > 0 && force !== true) {
+      showTestMsg(
+        `<b>Faltan ${blank} ${noun} sin responder.</b> Puedes seguir contestando o finalizar dejándolas en blanco (puntúan 0).` +
+        `<div style="margin-top:10px;"><button id="finishAnywayBtn" class="danger">Finalizar con ${noun} en blanco</button></div>`
+      );
+      const btn = byId("finishAnywayBtn");
+      if (btn) btn.onclick = () => finishTest(true);
       return;
     }
 
+    stopTimer();
     App.state.endTime = Date.now();
     clearCurrentState();
     addToHistory();
     App.render.renderSummary();
+  };
+
+  /* ---------- Cronómetro ---------- */
+  let timerId = null;
+
+  const remainingMs = () => {
+    const { timeLimitMs, startTime } = App.state;
+    if (!timeLimitMs || !startTime) return null;
+    return startTime + timeLimitMs - Date.now();
+  };
+
+  const tick = () => {
+    const r = remainingMs();
+    App.render.renderTimer(r);
+    if (r !== null && r <= 0) {
+      stopTimer();
+      finishTest(true);
+    }
+  };
+
+  const startTimer = () => {
+    if (!App.state.timeLimitMs) { App.render.renderTimer(null); return; }
+    if (timerId) return;
+    tick();
+    if (timerId === null && remainingMs() > 0) timerId = setInterval(tick, 1000);
+  };
+
+  const stopTimer = () => {
+    if (timerId) clearInterval(timerId);
+    timerId = null;
   };
 
   const jumpToQuestion = (newIndex) => {
@@ -346,6 +386,10 @@
     setHidden(byId("homeLink"), true);
     setHidden(byId("exitLink"), false);
 
+    // Sesión con cronómetro ya agotado: se corrige directamente.
+    const r = remainingMs();
+    if (r !== null && r <= 0) { finishTest(true); return; }
+
     App.render.renderQuestion();
   };
 
@@ -393,6 +437,8 @@
     addToHistory,
     clearHistory,
     finishTest,
+    startTimer,
+    stopTimer,
     initDashboard,
     goToSetup,
     applySetupKind,

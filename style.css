@@ -371,6 +371,18 @@ button.info {
     transition: background 0.2s;
 }
 
+#navTimer {
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted, #64748b);
+    margin-top: 2px;
+}
+
+#navTimer.warn {
+    color: var(--danger);
+    font-weight: 700;
+}
+
 .nav-center:hover {
     background: #e2e8f0;
 }
