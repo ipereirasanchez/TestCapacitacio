@@ -68,6 +68,34 @@
           <p>Continuar test previo</p>
         </div>
 
+        <!-- Card: Casos prácticos -->
+        <div class="dash-card" id="btnDashCasos">
+          <div class="dash-icon" style="background: #fdf4ff; color: #a21caf;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="7" width="20" height="14" rx="2" />
+              <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+              <path d="M2 13h20" />
+            </svg>
+          </div>
+          <h3>Casos Prácticos</h3>
+          <p>Segunda prueba del examen</p>
+        </div>
+
+        <!-- Card: Simulacro -->
+        <div class="dash-card" id="btnDashSimulacro">
+          <div class="dash-icon" style="background: #fef2f2; color: #dc2626;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 2h6" />
+              <path d="M12 14v-4" />
+              <circle cx="12" cy="14" r="8" />
+            </svg>
+          </div>
+          <h3>Simulacro</h3>
+          <p>200 preguntas · 2 horas</p>
+        </div>
+
         <!-- Card: Quick Exam (20 Random) -->
         <div class="dash-card" id="btnDashExam">
           <div class="dash-icon" style="background: #fff7ed; color: #ea580c;">
@@ -79,6 +107,19 @@
           </div>
           <h3>Examen Rápido</h3>
           <p>20 preguntas aleatorias</p>
+        </div>
+
+        <!-- Card: Repasar fallos (hidden until there are any) -->
+        <div class="dash-card hidden" id="btnDashFallos">
+          <div class="dash-icon" style="background: #fffbeb; color: #d97706;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 12a9 9 0 1 0 3-6.7" />
+              <path d="M3 3v6h6" />
+            </svg>
+          </div>
+          <h3>Repasar fallos</h3>
+          <p id="fallosCount"></p>
         </div>
 
         <!-- Card: History -->
@@ -118,15 +159,33 @@
 
       <div class="row">
         <div>
+          <label for="bankKind">Tipo</label>
+          <select id="bankKind">
+            <option value="test">Preguntas tipo test</option>
+            <option value="caso">Casos prácticos</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="source">Fuente</label>
+          <select id="source">
+            <option value="all">Todo el banco</option>
+            <option value="fallos">Solo mis fallos</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:12px;">
+        <div>
           <label for="mode">Modo</label>
           <select id="mode">
-            <option value="themes">Modo 1: temas elegidos</option>
-            <option value="all200">Modo 2: 200 de todo</option>
+            <option value="themes">Por temas</option>
+            <option value="all">Examen completo</option>
           </select>
         </div>
 
         <div id="nWrap">
-          <label for="n">Número de preguntas (Modo 1)</label>
+          <label for="n" id="nLabel">Número de preguntas</label>
           <input id="n" type="number" min="1" value="20" />
         </div>
       </div>
@@ -134,13 +193,17 @@
       <div style="margin-top:12px;">
         <label for="topics">Temas (Ctrl/⌘ para multi-selección)</label>
         <select id="topics" multiple size="8"></select>
-        <p class="muted" style="margin:8px 0 0 0;">En modo “200 de todo” esto se ignora.</p>
+        <p class="muted" id="modeHint" style="margin:8px 0 0 0;">“Examen completo” toma 200 preguntas de todos los temas, como la prueba oficial.</p>
       </div>
 
-      <div style="margin-top:12px;">
+      <div style="margin-top:12px; display:flex; flex-direction:column; gap:10px;">
         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500;">
           <input type="checkbox" id="examMode" style="width: auto; margin: 0;">
           <span><b>Modo Examen</b> (corrección solo al final)</span>
+        </label>
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500;">
+          <input type="checkbox" id="timerMode" style="width: auto; margin: 0;">
+          <span><b>Cronómetro oficial</b> (2 horas; al acabar el tiempo se corrige)</span>
         </label>
       </div>
 

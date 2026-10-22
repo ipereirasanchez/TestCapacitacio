@@ -28,7 +28,7 @@
       if (status) status.textContent = `Banco cargado: ${App.state.BANK.length} preguntas.`;
       App.render.renderBankMeta();
 
-      App.actions.fillTopicsSelect();
+      App.actions.fillTopicsSelect("test");
       App.render.renderHistoryTable();
 
       // 3) Iniciar en Dashboard

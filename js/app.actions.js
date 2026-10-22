@@ -6,17 +6,15 @@
   const setHidden = App.dom.setHidden;
   const show = App.dom.show;
 
-  const topicsFromBank = () => {
-    const { BANK } = App.state;
-    return Array.from(new Set(BANK.map((q) => q.topic))).sort();
-  };
+  const topicsFromBank = (kind) =>
+    Array.from(new Set(bankFor(kind).map((q) => q.topic))).sort();
 
-  const fillTopicsSelect = () => {
+  const fillTopicsSelect = (kind = "test") => {
     const sel = byId("topics");
     if (!sel) return;
 
     sel.innerHTML = "";
-    topicsFromBank().forEach((t) => {
+    topicsFromBank(kind).forEach((t) => {
       const opt = document.createElement("option");
       opt.value = t;
       opt.textContent = t;
@@ -62,13 +60,53 @@
     setHidden(byId("homeLink"), true); // Home link hidden on home
     setHidden(byId("exitLink"), true);
 
+    // Tarjeta "Repasar fallos"
+    const nTest = getFallosCodes("test").length;
+    const nCaso = getFallosCodes("caso").length;
+    setHidden(byId("btnDashFallos"), nTest + nCaso === 0);
+    const fc = byId("fallosCount");
+    if (fc) fc.textContent = `${nTest} preguntas · ${nCaso} casos`;
+
     App.state.idx = 0;
   };
 
-  const goToSetup = () => {
+  // Ajusta el formulario de configuración al tipo elegido (temas, número por defecto, textos).
+  const applySetupKind = async (kind) => {
+    const isCaso = kind === "caso";
+    if (isCaso) {
+      try { await ensureCasosLoaded(); }
+      catch (e) { console.error(e); showSetupMsg("No se han podido cargar los casos prácticos."); return; }
+    }
+    fillTopicsSelect(kind);
+    const nLabel = byId("nLabel");
+    if (nLabel) nLabel.textContent = isCaso ? "Número de casos" : "Número de preguntas";
+    const nEl = byId("n");
+    if (nEl) nEl.value = isCaso ? 4 : 20;
+    const hint = byId("modeHint");
+    if (hint) hint.textContent = isCaso
+      ? "“Examen completo” toma 4 casos de todos los temas, como la prueba oficial."
+      : "“Examen completo” toma 200 preguntas de todos los temas, como la prueba oficial.";
+  };
+
+  const showSetupMsg = (html) => {
+    const msg = byId("setupMsg");
+    if (msg) { msg.innerHTML = html; setHidden(msg, false); }
+  };
+
+  // preset: { kind?, source?, n? }
+  const goToSetup = async (preset = {}) => {
     setHidden(byId("screen-home"), true);
     setHidden(byId("screen-setup"), false);
     setHidden(byId("homeLink"), false); // Can go home from setup
+    setHidden(byId("setupMsg"), true);
+
+    const kindEl = byId("bankKind");
+    const srcEl = byId("source");
+    if (preset.kind && kindEl) kindEl.value = preset.kind;
+    if (preset.source && srcEl) srcEl.value = preset.source;
+    await applySetupKind(kindEl ? kindEl.value : "test");
+    if (preset.n && byId("n")) byId("n").value = preset.n;
+    setHidden(byId("nWrap"), byId("mode")?.value === "all");
   };
 
   const goToHistory = () => {
@@ -78,12 +116,19 @@
     App.render.renderHistoryTable();
   };
 
-  const startQuickExam = () => {
-    // Modo Examen Rápido: 20 random de todo, exam mode ON
-    if (byId("mode")) byId("mode").value = "all200";
-    if (byId("examMode")) byId("examMode").checked = true;
-    // Simular submit
-    startTest();
+  // Examen Rápido: 20 preguntas de todos los temas, modo examen, sin cronómetro.
+  const startQuickExam = () =>
+    startTest({ kind: "test", source: "all", mode: "themes", n: 20, topics: null, examMode: true, timer: false });
+
+  // Simulacro: la primera prueba oficial completa (200 preguntas, 2 h, corrección al final).
+  const startSimulacro = () =>
+    startTest({ kind: "test", source: "all", mode: "all", examMode: true, timer: true });
+
+  // Códigos guardados como fallados para un tipo ("test" | "caso").
+  const getFallosCodes = (kind) => {
+    const fallos = App.utils.storage.get("fallos") || {};
+    const prefix = `${kind}:`;
+    return Object.keys(fallos).filter((k) => k.startsWith(prefix)).map((k) => k.slice(prefix.length));
   };
 
   /* ---------- Actions ---------- */
@@ -93,31 +138,49 @@
     return Array.from(sel.selectedOptions).map((o) => o.value);
   };
 
-  const startTest = () => {
-    const modeEl = byId("mode");
-    const nEl = byId("n");
-    if (!modeEl || !nEl) return;
+  // opts sobrescribe lo leído del formulario:
+  // { kind, source, mode ("themes"|"all"), n, topics (array | null = todos), examMode, timer }
+  const startTest = async (opts = {}) => {
+    const cfg = Object.assign({
+      kind: byId("bankKind")?.value || "test",
+      source: byId("source")?.value || "all",
+      mode: byId("mode")?.value || "themes",
+      n: parseInt(byId("n")?.value || "20", 10),
+      topics: getSelectedTopics(),
+      examMode: !!byId("examMode")?.checked,
+      timer: !!byId("timerMode")?.checked,
+    }, opts);
 
-    const mode = modeEl.value;
-    const n = parseInt(nEl.value || "20", 10);
-    const topics = getSelectedTopics();
-
-    let pool = [];
-    if (mode === "all200") {
-      pool = App.state.BANK;
-      App.state.currentSet = App.utils.sample(pool, 200);
-    } else {
-      pool = App.state.BANK.filter((q) => topics.includes(q.topic));
-      if (!pool.length) {
-        const msg = byId("setupMsg");
-        if (msg) msg.innerHTML = "Selecciona al menos un tema con preguntas.";
-        setHidden(byId("setupMsg"), false);
-        return;
-      }
-      App.state.currentSet = App.utils.sample(pool, Math.max(1, n));
+    if (cfg.kind === "caso") {
+      try { await ensureCasosLoaded(); }
+      catch (e) { console.error(e); await goToSetup(); showSetupMsg("No se han podido cargar los casos prácticos."); return; }
     }
 
+    const noun = cfg.kind === "caso" ? "casos" : "preguntas";
+    let pool = bankFor(cfg.kind);
+    if (cfg.source === "fallos") {
+      const codes = new Set(getFallosCodes(cfg.kind));
+      pool = pool.filter((q) => codes.has(q.code));
+    }
+    if (cfg.mode === "themes" && cfg.topics !== null) {
+      if (!cfg.topics.length) { showSetupMsg("Selecciona al menos un tema."); return; }
+      pool = pool.filter((q) => cfg.topics.includes(q.topic));
+    }
+    if (!pool.length) {
+      if (byId("screen-setup").classList.contains("hidden")) await goToSetup();
+      showSetupMsg(`No hay ${noun} con esos filtros.`);
+      return;
+    }
+
+    const size = cfg.mode === "all"
+      ? (cfg.kind === "caso" ? 4 : 200)
+      : Math.max(1, Number.isFinite(cfg.n) ? cfg.n : 1);
+    App.state.currentSet = App.utils.sample(pool, size);
+
     // Estado del test
+    App.state.kind = cfg.kind;
+    App.state.source = cfg.source;
+    App.state.timeLimitMs = cfg.timer ? App.scoring.TIME_LIMIT_MS : null;
     App.state.idx = 0;
     App.state.userSelected = null;
 
@@ -126,7 +189,7 @@
 
     App.state.startTime = Date.now();
     App.state.endTime = null;
-    App.state.isExamMode = byId("examMode")?.checked || false;
+    App.state.isExamMode = !!cfg.examMode;
 
     saveCurrentState();
 
@@ -252,9 +315,9 @@
   };
 
   const saveCurrentState = () => {
-    const { currentSet, idx, answers, results, startTime, isExamMode } = App.state;
+    const { currentSet, idx, answers, results, startTime, isExamMode, kind, source, timeLimitMs } = App.state;
     if (!currentSet || currentSet.length === 0) return;
-    App.utils.storage.set("session", { currentSet, idx, answers, results, startTime, isExamMode });
+    App.utils.storage.set("session", { currentSet, idx, answers, results, startTime, isExamMode, kind, source, timeLimitMs });
   };
 
   const clearCurrentState = () => {
@@ -271,6 +334,10 @@
     App.state.results = session.results;
     App.state.startTime = session.startTime;
     App.state.isExamMode = session.isExamMode || false;
+    // Sesiones guardadas por versiones anteriores: test, banco completo, sin cronómetro.
+    App.state.kind = session.kind || "test";
+    App.state.source = session.source || "all";
+    App.state.timeLimitMs = session.timeLimitMs ?? null;
     App.state.endTime = null;
 
     // UI Update for Test
@@ -328,7 +395,10 @@
     finishTest,
     initDashboard,
     goToSetup,
+    applySetupKind,
     goToHistory,
-    startQuickExam
+    startQuickExam,
+    startSimulacro,
+    getFallosCodes
   };
 })();

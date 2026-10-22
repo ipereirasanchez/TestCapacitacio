@@ -53,6 +53,12 @@ body {
     opacity: 0;
 }
 
+/* Regla genérica: cualquier elemento con .hidden desaparece
+   (la barra inferior se oculta deslizándose, ver .bottom-nav.hidden). */
+.hidden:not(.bottom-nav) {
+    display: none !important;
+}
+
 h1 {
     font-size: 1.875rem;
     font-weight: 700;
