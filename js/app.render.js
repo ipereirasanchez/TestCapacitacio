@@ -12,8 +12,10 @@
     const q = currentSet[idx];
     if (!q) return;
 
+    const isCaso = Array.isArray(q.scenario);
+
     // Set Meta Info
-    byId("qTitle").textContent = `Pregunta ${idx + 1} — ${q.topic}`;
+    byId("qTitle").textContent = `${isCaso ? "Caso" : "Pregunta"} ${idx + 1} — ${q.topic}`;
     byId("qMeta").innerHTML = q.code ? `<span class="code">COD: ${q.code}</span>` : "";
 
     // Configurar acción principal
@@ -45,8 +47,10 @@
     // Ocultar pista en modo examen //
     setHidden(byId("hintBtn"), App.state.isExamMode);
 
-    // Renderizado Texto
-    byId("qText").innerHTML = `<div style="white-space:normal;">${q.question}</div>`;
+    // Renderizado Texto (un caso trae el enunciado en párrafos)
+    byId("qText").innerHTML = isCaso
+      ? `<div class="scenario">${q.scenario.map((p) => `<p>${p}</p>`).join("")}</div>`
+      : `<div style="white-space:normal;">${q.question}</div>`;
 
     // Renderizado de opciones
     const optsContainer = byId("qOptions");
@@ -60,7 +64,7 @@
       const isCorrectAnswer = (optData.key === q.answer);
 
       const div = document.createElement("div");
-      div.className = "opt";
+      div.className = isCaso ? "opt caso" : "opt";
 
       if (saved) {
         // Ya respondida
@@ -92,7 +96,15 @@
       radio.disabled = !!saved;
 
       const span = document.createElement("span");
-      span.innerHTML = `<b>${optData.key}:</b> ${optData.text}`;
+      if (isCaso) {
+        // Alternativa compuesta: una respuesta por sub-pregunta (a, b, c)
+        const items = optData.items || [];
+        span.innerHTML = items.length > 1
+          ? `<b>${optData.key}</b><ol class="opt-items">${items.map((t) => `<li>${t}</li>`).join("")}</ol>`
+          : `<b>${optData.key}:</b> ${items[0] || ""}`;
+      } else {
+        span.innerHTML = `<b>${optData.key}:</b> ${optData.text}`;
+      }
 
       div.appendChild(radio);
       div.appendChild(span);
@@ -139,7 +151,8 @@
         `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> Incorrecto`
       }
        </div>
-       <div>${q.norma || "Sin explicación disponible."}</div>
+       <div><b>Norma:</b> ${q.norma || "Sin explicación disponible."}</div>
+       ${q.referencia ? `<div class="muted" style="margin-top:6px;"><b>Referencia doctrinal:</b> ${q.referencia}</div>` : ""}
      `;
     setHidden(box, false);
   };

@@ -217,6 +217,29 @@ button.info {
     background: #f5f3ff;
 }
 
+/* Alternativas de casos prácticos: contenido largo, radio alineado arriba */
+.opt.caso {
+    align-items: flex-start;
+}
+
+.opt.caso>span {
+    flex: 1;
+}
+
+.opt-items {
+    margin: 6px 0 0 0;
+    padding-left: 22px;
+    list-style: lower-alpha;
+}
+
+.opt-items li {
+    margin: 4px 0;
+}
+
+.scenario p {
+    margin: 0 0 10px 0;
+}
+
 .opt input[type="radio"] {
     width: 20px;
     height: 20px;
