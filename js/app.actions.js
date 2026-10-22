@@ -241,6 +241,7 @@
   const nextQuestion = () => {
     if (App.state.idx < App.state.currentSet.length - 1) {
       App.state.idx += 1;
+      App.state.userSelected = null; // no arrastrar la selección a la siguiente pregunta
       saveCurrentState();
       App.render.renderQuestion();
     } else {
@@ -251,6 +252,7 @@
   const skipQuestion = () => {
     if (App.state.idx < App.state.currentSet.length - 1) {
       App.state.idx += 1;
+      App.state.userSelected = null;
       saveCurrentState();
       App.render.renderQuestion();
     } else {
@@ -278,8 +280,23 @@
     stopTimer();
     App.state.endTime = Date.now();
     clearCurrentState();
+    updateFallos(App.state.kind, App.state.results);
     addToHistory();
     App.render.renderSummary();
+  };
+
+  // Fallos acumulados entre sesiones: { "<kind>:<code>": { count, last } }.
+  // Un fallo incrementa el contador; un acierto borra la entrada.
+  const updateFallos = (kind, results) => {
+    const fallos = App.utils.storage.get("fallos") || {};
+    const now = new Date().toISOString();
+    (results || []).forEach((r) => {
+      if (!r || !r.question) return;
+      const key = App.scoring.itemKey(kind, r.question.code);
+      if (r.correct) delete fallos[key];
+      else fallos[key] = { count: ((fallos[key] && fallos[key].count) || 0) + 1, last: now };
+    });
+    App.utils.storage.set("fallos", fallos);
   };
 
   /* ---------- Cronómetro ---------- */
@@ -343,9 +360,13 @@
       return;
     }
 
-    // Modo “repetir fallos”
+    // Modo “repetir fallos”: mismo tipo, sin cronómetro, tiempo desde ahora
     App.state.answers = new Array(wrongQs.length).fill(null);
     App.state.results = new Array(wrongQs.length).fill(null);
+    App.state.timeLimitMs = null;
+    App.state.startTime = Date.now();
+    App.state.endTime = null;
+    saveCurrentState();
 
     App.render.renderQuestion();
   };
@@ -394,19 +415,20 @@
   };
 
   const addToHistory = () => {
-    const { startTime, endTime, answers } = App.state;
-    const answered = answers.filter((a) => a !== null);
-    const correct = answered.filter((a) => a.correct).length;
-    const wrong = answered.filter((a) => !a.correct).length;
-    const skipped = answers.length - answered.length;
+    const { startTime, endTime, answers, kind } = App.state;
+    const sc = App.scoring.score(kind, answers);
 
     const entry = {
       date: new Date().toISOString(),
       duration: endTime - startTime,
+      kind,
       total: answers.length,
-      correct,
-      wrong,
-      skipped,
+      correct: sc.correct,
+      wrong: sc.wrong,
+      skipped: sc.blank,
+      points: sc.points,
+      max: sc.max,
+      pct: sc.pct,
     };
 
     const history = App.utils.storage.get("history") || [];
@@ -437,6 +459,7 @@
     addToHistory,
     clearHistory,
     finishTest,
+    updateFallos,
     startTimer,
     stopTimer,
     initDashboard,

@@ -264,9 +264,9 @@
 
     <!-- Pantalla: resumen -->
     <div class="card hidden" id="screen-summary" style="margin-top:14px;">
-      <h2>Resumen del test</h2>
+      <h2 id="sumTitle">Resumen del test</h2>
 
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:20px;">
+      <div class="summary-tiles">
         <div class="opt correct" style="flex-direction:column; align-items:center; gap:4px">
           <span style="font-size:2rem; font-weight:700;" id="sumCorrect">0</span>
           <span style="font-size:0.9rem;">Aciertos</span>
@@ -275,11 +275,25 @@
           <span style="font-size:2rem; font-weight:700;" id="sumWrong">0</span>
           <span style="font-size:0.9rem;">Fallos</span>
         </div>
+        <div class="opt" style="flex-direction:column; align-items:center; gap:4px; pointer-events:none;">
+          <span style="font-size:2rem; font-weight:700;" id="sumBlank">0</span>
+          <span style="font-size:0.9rem;">En blanco</span>
+        </div>
+      </div>
+
+      <div class="score-box" id="scoreBox">
+        <div id="sumScore" class="score-main"></div>
+        <div id="sumVerdict" class="score-verdict"></div>
+        <p class="muted" style="margin:8px 0 0 0; font-size:0.85rem;">
+          Baremo oficial: cada fallo descuenta un tercio de un acierto y los blancos no puntúan.
+          La parte se supera con el 50 %; el examen exige además el 60 % del total sumando las dos pruebas.
+        </p>
       </div>
 
       <p id="sumTime" class="muted" style="text-align:center;"></p>
-      <p id="sumSkipped" class="muted" style="text-align:center; display:none;"></p>
-      <!-- Hidden by default, less relevant now -->
+
+      <h3 style="margin:20px 0 8px 0;">Por tema</h3>
+      <div id="sumTopics" style="overflow-x:auto;"></div>
 
       <div class="row" style="margin-top:24px;">
         <button class="primary" id="reviewBtn">Repetir fallos</button>

@@ -68,7 +68,7 @@
     if (btnDashNew) btnDashNew.addEventListener("click", () => App.actions.goToSetup({ kind: "test", source: "all" }));
 
     const btnDashCasos = byId("btnDashCasos");
-    if (btnDashCasos) btnDashCasos.addEventListener("click", () => App.actions.goToSetup({ kind: "caso", n: 4 }));
+    if (btnDashCasos) btnDashCasos.addEventListener("click", () => App.actions.goToSetup({ kind: "caso", source: "all", n: 4 }));
 
     const btnDashSimulacro = byId("btnDashSimulacro");
     if (btnDashSimulacro) btnDashSimulacro.addEventListener("click", App.actions.startSimulacro);

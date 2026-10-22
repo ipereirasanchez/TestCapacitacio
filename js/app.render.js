@@ -241,26 +241,40 @@
   };
 
   /* ---------- Render Summary ---------- */
+  const fmt = (n, digits = 1) => Number(n).toLocaleString("es-ES", { maximumFractionDigits: digits });
+
   const renderSummary = () => {
     App.actions.stopTimer();
     setHidden(byId("bottomNav"), true); // Hide nav in summary 
 
-    const { startTime, endTime, answers, currentSet } = App.state;
-    // Fix: check if endTime is set, otherwise set it
+    const { startTime, endTime, answers, currentSet, kind } = App.state;
     const end = endTime || Date.now();
     const { minutes, seconds } = App.utils.formatDurationMs(end - startTime);
+    const isCaso = kind === "caso";
 
-    const answered = answers.filter((a) => a !== null);
-    const correct = answered.filter((a) => a.correct).length;
-    const wrong = answered.filter((a) => !a.correct).length;
-    // const skipped = answers.length - answered.length;
+    const sc = App.scoring.score(kind, answers);
 
+    byId("sumTitle").textContent = isCaso ? "Resumen de los casos prácticos" : "Resumen del test";
     byId("sumTime").textContent = `Tiempo total: ${minutes}m ${seconds}s`;
-    byId("sumCorrect").textContent = correct;
-    byId("sumWrong").textContent = wrong;
+    byId("sumCorrect").textContent = sc.correct;
+    byId("sumWrong").textContent = sc.wrong;
+    byId("sumBlank").textContent = sc.blank;
 
-    // Remove old select rendering
-    // Re-use logic if needed but user wanted Platinum UX.
+    byId("sumScore").textContent = `Puntuación oficial: ${fmt(sc.points)} / ${sc.max} (${fmt(sc.pct)} %)`;
+    const verdict = byId("sumVerdict");
+    verdict.textContent = sc.passed ? "Parte superada (≥ 50 %)" : "Parte no superada (< 50 %)";
+    verdict.className = `score-verdict ${sc.passed ? "pass" : "fail"}`;
+
+    // Desglose por tema
+    const rows = App.scoring.topicBreakdown(currentSet, answers);
+    byId("sumTopics").innerHTML = `
+      <table class="stats">
+        <thead><tr><th>Tema</th><th class="num">Aciertos</th><th class="num">Fallos</th><th class="num">Blanco</th><th class="num">%</th></tr></thead>
+        <tbody>${rows.map((r) => {
+          const pct = r.total ? Math.round((r.correct / r.total) * 100) : 0;
+          return `<tr><td>${r.topic}</td><td class="num">${r.correct}</td><td class="num">${r.wrong}</td><td class="num">${r.blank}</td><td class="num" style="color:${pct >= 50 ? "var(--success)" : "var(--danger)"}; font-weight:700;">${pct}%</td></tr>`;
+        }).join("")}</tbody>
+      </table>`;
 
     // Ocultar barra de progreso
     setHidden(byId("prog-wrap"), true);
@@ -282,11 +296,13 @@
     }
 
     let html = `
-      <table style="width:100%; border-collapse: collapse; margin-top:10px; font-size: 0.9em;">
+      <table class="stats" style="margin-top:10px;">
         <thead>
-          <tr style="text-align:left; border-bottom: 2px solid #eee;">
-            <th style="padding:8px;">Fecha</th>
-            <th style="padding:8px;">Nota</th>
+          <tr>
+            <th>Fecha</th>
+            <th>Tipo</th>
+            <th class="num">Nota</th>
+            <th class="num">Puntos</th>
           </tr>
         </thead>
         <tbody>
@@ -294,15 +310,20 @@
 
     history.forEach((h) => {
       const date = new Date(h.date).toLocaleDateString();
-      const score = Math.round((h.correct / h.total) * 100);
+      // Entradas antiguas (sin kind/points): se muestran como test y sin puntos.
+      const kindLabel = h.kind === "caso" ? "Casos" : "Test";
+      const pct = Number.isFinite(h.pct) ? h.pct : Math.round((h.correct / h.total) * 100);
+      const points = Number.isFinite(h.points) ? `${fmt(h.points)} / ${h.max}` : "—";
 
       html += `
-        <tr style="border-bottom: 1px solid #eee;">
-          <td style="padding:8px;">${date}</td>
-          <td style="padding:8px;">
-            <span style="color:${score >= 50 ? 'var(--success)' : 'var(--danger)'}; font-weight:700;">${score}%</span> 
+        <tr>
+          <td>${date}</td>
+          <td>${kindLabel}</td>
+          <td class="num">
+            <span style="color:${pct >= 50 ? 'var(--success)' : 'var(--danger)'}; font-weight:700;">${fmt(pct)}%</span>
             <span class="muted" style="font-size:0.8em">(${h.correct}/${h.total})</span>
           </td>
+          <td class="num">${points}</td>
         </tr>
       `;
     });
