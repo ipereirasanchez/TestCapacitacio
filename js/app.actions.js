@@ -145,9 +145,15 @@
     App.render.renderHistoryTable();
   };
 
-  // Examen Rápido: 20 preguntas de todos los temas, modo examen, sin cronómetro.
-  const startQuickExam = () =>
-    startTest({ kind: "test", source: "all", mode: "themes", n: 20, topics: null, examMode: true, timer: false });
+  // Examen Rápido: 20 preguntas de todos los temas, sin cronómetro. La tarjeta abre
+  // un selector de modo: estudio (corrección tras cada pregunta) o examen (al final).
+  const openQuickMode = () => byId("quickModeModal")?.classList.add("active");
+  const closeQuickMode = () => byId("quickModeModal")?.classList.remove("active");
+
+  const startQuickExam = (examMode) => {
+    closeQuickMode();
+    return startTest({ kind: "test", source: "all", mode: "themes", n: 20, topics: null, examMode: examMode === true, timer: false });
+  };
 
   // Simulacro: la primera prueba oficial completa (200 preguntas, 2 h, corrección al final).
   const startSimulacro = () =>
@@ -257,6 +263,7 @@
     } else {
       // En modo práctica, re-renderizar para mostrar feedback inline + cambiar botón a "Siguiente"
       App.render.renderQuestion();
+      byId("inlineFeedback")?.scrollIntoView({ block: "nearest", behavior: "smooth" });
     }
   };
 
@@ -497,6 +504,8 @@
     elapsedMs,
     goToHistory,
     startQuickExam,
+    openQuickMode,
+    closeQuickMode,
     startSimulacro,
     getFallosCodes
   };

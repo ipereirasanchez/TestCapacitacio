@@ -82,7 +82,7 @@ Setup form controls carry `autocomplete="off"` on purpose: Chromium restores sel
 
 ### Entry points and test configuration
 
-Every way of starting a test goes through `App.actions.startTest(opts)`, which reads the setup form and lets `opts` override it: `{kind, source ("all"|"fallos"), mode ("themes"|"all"), n, topics (array | null = all), examMode, timer}`. Dashboard cards are presets: Nuevo Test → setup `{kind:"test", source:"all"}`; Casos Prácticos → setup `{kind:"caso", source:"all", n:4}`; Repasar fallos → setup `{source:"fallos"}`; Examen Rápido → `startTest` with 20 questions, exam mode, no timer; Simulacro → 200 questions, exam mode, 2 h timer. `mode:"all"` means 200 questions or 4 cases.
+Every way of starting a test goes through `App.actions.startTest(opts)`, which reads the setup form and lets `opts` override it: `{kind, source ("all"|"fallos"), mode ("themes"|"all"), n, topics (array | null = all), examMode, timer}`. Dashboard cards are presets: Nuevo Test → setup `{kind:"test", source:"all"}`; Casos Prácticos → setup `{kind:"caso", source:"all", n:4}`; Repasar fallos → setup `{source:"fallos"}`; Examen Rápido → opens the `quickModeModal` chooser, then `startQuickExam(examMode)` runs `startTest` with 20 questions, no timer, in study mode (feedback after each answer) or exam mode (feedback at the end); Simulacro → 200 questions, exam mode, 2 h timer. `mode:"all"` means 200 questions or 4 cases.
 
 `goToSetup(preset)` applies synchronous defaults (labels, `n`) before awaiting the casos load so user input is never overwritten; `startBtn` is disabled while casos load. Keep that ordering if you touch it.
 
@@ -96,7 +96,7 @@ Every way of starting a test goes through `App.actions.startTest(opts)`, which r
 
 ### Rendering
 
-`App.render.renderQuestion()` is the single re-render point for the question screen and rebuilds options, main button, progress bar, inline feedback, bottom nav and timer from state. Dynamic elements get handlers via `el.onclick = ...` (assignment, not `addEventListener`) so re-renders don't stack listeners; follow that pattern. Case alternatives render as `.opt.caso` with an `<ol class="opt-items">` (lower-alpha) when they have more than one item.
+`App.render.renderQuestion()` is the single re-render point for the question screen and rebuilds options, main button, progress bar, inline feedback, bottom nav and timer from state. Dynamic elements get handlers via `el.onclick = ...` (assignment, not `addEventListener`) so re-renders don't stack listeners; follow that pattern. `renderSummary` ends with `renderReview(filter)`, the full correction list (every item with the user's answer, the right answer and the justification, filterable by aciertos/fallos/blancos); it shares `optionHtml` and `justificationHtml` with the question screen. Case alternatives render as `.opt.caso` with an `<ol class="opt-items">` (lower-alpha) when they have more than one item.
 
 ### Persistence (`localStorage`, prefix `test_cap_`)
 
