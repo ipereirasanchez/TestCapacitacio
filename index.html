@@ -106,7 +106,7 @@
             </svg>
           </div>
           <h3>Examen Rápido</h3>
-          <p>20 preguntas aleatorias</p>
+          <p>20 preguntas · estudio o examen</p>
         </div>
 
         <!-- Card: Repasar fallos (hidden until there are any) -->
@@ -299,6 +299,10 @@
         <button class="primary" id="reviewBtn">Repetir fallos</button>
         <button class="danger" id="backBtn">Volver al menú</button>
       </div>
+
+      <h3 style="margin:28px 0 8px 0;">Corrección</h3>
+      <div class="review-filters" id="sumReviewFilters"></div>
+      <div id="sumReview"></div>
     </div>
   </div>
 
@@ -337,6 +341,27 @@
       </div>
       <div style="padding:16px; border-top:1px solid var(--border);">
         <button class="success" id="finishGridBtn" style="width:100%">Finalizar Test</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: modo del Examen Rápido -->
+  <div class="modal-overlay" id="quickModeModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="margin:0">Examen Rápido · 20 preguntas</h3>
+        <button id="closeQuickModeBtn"
+          style="background:none; border:none; padding:4px; font-size:1.5rem; cursor:pointer;">&times;</button>
+      </div>
+      <div class="modal-body mode-choices">
+        <button class="mode-choice" id="quickStudyBtn">
+          <b>📖 Modo estudio</b>
+          <span>Al comprobar cada pregunta ves si es correcta o incorrecta, con la respuesta marcada y su justificación.</span>
+        </button>
+        <button class="mode-choice" id="quickExamBtn">
+          <b>📝 Modo examen</b>
+          <span>Sin correcciones durante el test. Al final ves la nota y la corrección completa de todas las preguntas.</span>
+        </button>
       </div>
     </div>
   </div>

@@ -6,6 +6,20 @@
   const setHidden = App.dom.setHidden;
   const show = App.dom.show;
 
+  // Contenido de una alternativa. En un caso es compuesta: una respuesta por sub-pregunta (a, b, c).
+  const optionHtml = (optData, isCaso) => {
+    if (!isCaso) return `<b>${optData.key}:</b> ${optData.text}`;
+    const items = optData.items || [];
+    return items.length > 1
+      ? `<b>${optData.key}</b><ol class="opt-items">${items.map((t) => `<li>${t}</li>`).join("")}</ol>`
+      : `<b>${optData.key}:</b> ${items[0] || ""}`;
+  };
+
+  // Justificación de la respuesta (norma + referencia doctrinal si la hay).
+  const justificationHtml = (q) => `
+       <div><b>Justificación:</b> ${q.norma || "Sin explicación disponible."}</div>
+       ${q.referencia ? `<div class="muted" style="margin-top:6px;"><b>Referencia doctrinal:</b> ${q.referencia}</div>` : ""}`;
+
   /* ---------- Render Question (Single View) ---------- */
   const renderQuestion = () => {
     const { currentSet, idx, answers } = App.state;
@@ -96,15 +110,7 @@
       radio.disabled = !!saved;
 
       const span = document.createElement("span");
-      if (isCaso) {
-        // Alternativa compuesta: una respuesta por sub-pregunta (a, b, c)
-        const items = optData.items || [];
-        span.innerHTML = items.length > 1
-          ? `<b>${optData.key}</b><ol class="opt-items">${items.map((t) => `<li>${t}</li>`).join("")}</ol>`
-          : `<b>${optData.key}:</b> ${items[0] || ""}`;
-      } else {
-        span.innerHTML = `<b>${optData.key}:</b> ${optData.text}`;
-      }
+      span.innerHTML = optionHtml(optData, isCaso);
 
       div.appendChild(radio);
       div.appendChild(span);
@@ -166,8 +172,7 @@
         `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> Incorrecto`
       }
        </div>
-       <div><b>Norma:</b> ${q.norma || "Sin explicación disponible."}</div>
-       ${q.referencia ? `<div class="muted" style="margin-top:6px;"><b>Referencia doctrinal:</b> ${q.referencia}</div>` : ""}
+       ${justificationHtml(q)}
      `;
     setHidden(box, false);
   };
@@ -280,7 +285,75 @@
 
     if (!currentSet.length) return;
 
+    renderReview("all");
+
     show("screen-summary");
+  };
+
+  /* ---------- Render Review (corrección completa en el resumen) ---------- */
+  const REVIEW_STATUS = {
+    correct: { label: "Correcta", filter: "Aciertos" },
+    wrong: { label: "Incorrecta", filter: "Fallos" },
+    blank: { label: "En blanco", filter: "En blanco" },
+  };
+
+  const statusOf = (ans) => (!ans ? "blank" : ans.correct ? "correct" : "wrong");
+
+  // filter: "all" | "correct" | "wrong" | "blank"
+  const renderReview = (filter = "all") => {
+    const { currentSet, answers } = App.state;
+    const box = byId("sumReview");
+    const filters = byId("sumReviewFilters");
+    if (!box || !filters) return;
+
+    const counts = { all: currentSet.length, correct: 0, wrong: 0, blank: 0 };
+    answers.forEach((a) => { counts[statusOf(a)] += 1; });
+
+    filters.innerHTML = "";
+    [["all", "Todas"], ...Object.entries(REVIEW_STATUS).map(([k, v]) => [k, v.filter])].forEach(([key, label]) => {
+      const b = document.createElement("button");
+      b.className = `review-filter${key === filter ? " active" : ""}`;
+      b.textContent = `${label} (${counts[key]})`;
+      b.onclick = () => renderReview(key);
+      filters.appendChild(b);
+    });
+
+    const html = currentSet.map((q, i) => {
+      const ans = answers[i];
+      const status = statusOf(ans);
+      if (filter !== "all" && filter !== status) return "";
+      const isCaso = Array.isArray(q.scenario);
+
+      const opts = q.options.map((o) => {
+        const isRight = o.key === q.answer;
+        const isMine = !!ans && ans.selected === o.key;
+        const cls = isRight ? " correct" : isMine ? " wrong" : "";
+        const tag = isRight && isMine ? "Tu respuesta · Correcta"
+          : isRight ? "Respuesta correcta"
+          : isMine ? "Tu respuesta" : "";
+        return `<div class="opt static${isCaso ? " caso" : ""}${cls}">
+            <span>${optionHtml(o, isCaso)}</span>
+            ${tag ? `<span class="review-tag">${tag}</span>` : ""}
+          </div>`;
+      }).join("");
+
+      return `
+        <div class="review-item ${status}">
+          <div class="review-head">
+            <span class="review-badge">${REVIEW_STATUS[status].label}</span>
+            <b>${isCaso ? "Caso" : "Pregunta"} ${i + 1}</b>
+            <span class="muted">${q.topic}</span>
+            ${q.code ? `<span class="code">COD: ${q.code}</span>` : ""}
+          </div>
+          <div class="review-q">${isCaso
+            ? `<div class="scenario">${q.scenario.map((p) => `<p>${p}</p>`).join("")}</div>`
+            : q.question}</div>
+          <div class="options">${opts}</div>
+          <div class="review-just">${justificationHtml(q)}</div>
+        </div>`;
+    }).join("");
+
+    box.innerHTML = html || '<p class="muted">No hay preguntas en este apartado.</p>';
   };
 
   /* ---------- Render History ---------- */

@@ -85,7 +85,22 @@
     if (btnDashResume) btnDashResume.addEventListener("click", App.actions.loadSession);
 
     const btnDashExam = byId("btnDashExam");
-    if (btnDashExam) btnDashExam.addEventListener("click", App.actions.startQuickExam);
+    if (btnDashExam) btnDashExam.addEventListener("click", App.actions.openQuickMode);
+
+    // Selector de modo del Examen Rápido
+    const quickStudyBtn = byId("quickStudyBtn");
+    if (quickStudyBtn) quickStudyBtn.addEventListener("click", () => App.actions.startQuickExam(false));
+
+    const quickExamBtn = byId("quickExamBtn");
+    if (quickExamBtn) quickExamBtn.addEventListener("click", () => App.actions.startQuickExam(true));
+
+    const closeQuickModeBtn = byId("closeQuickModeBtn");
+    if (closeQuickModeBtn) closeQuickModeBtn.addEventListener("click", App.actions.closeQuickMode);
+
+    const quickModeModal = byId("quickModeModal");
+    if (quickModeModal) quickModeModal.addEventListener("click", (e) => {
+      if (e.target === quickModeModal) App.actions.closeQuickMode();
+    });
 
     const btnDashHistory = byId("btnDashHistory");
     if (btnDashHistory) btnDashHistory.addEventListener("click", App.actions.goToHistory);

@@ -431,7 +431,7 @@ table.stats th.num {
 #navTimer {
     font-size: 0.8rem;
     font-variant-numeric: tabular-nums;
-    color: var(--muted, #64748b);
+    color: var(--text-muted);
     margin-top: 2px;
 }
 
@@ -636,4 +636,137 @@ table.stats th.num {
 
 #screen-home {
     animation: fadeIn 0.4s ease-out;
+}
+/* Selector de modo (Examen Rápido) */
+.mode-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.mode-choice {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    width: 100%;
+    padding: 16px;
+    text-align: left;
+    background: #fff;
+    color: inherit;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+}
+
+.mode-choice:hover {
+    border-color: var(--primary);
+    background: #f5f3ff;
+}
+
+.mode-choice b {
+    font-size: 1.05rem;
+}
+
+.mode-choice span {
+    font-weight: 400;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: var(--text-muted);
+}
+
+/* Corrección completa en el resumen */
+.review-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.review-filter {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    border-radius: 999px;
+    background: #fff;
+    color: inherit;
+    border: 1px solid var(--border);
+}
+
+.review-filter.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+}
+
+.review-item {
+    border: 1px solid var(--border);
+    border-left: 5px solid #94a3b8;
+    border-radius: 16px;
+    padding: 16px;
+    margin-top: 12px;
+}
+
+.review-item.correct {
+    border-left-color: #10b981;
+}
+
+.review-item.wrong {
+    border-left-color: #ef4444;
+}
+
+.review-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.review-badge {
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.review-item.correct .review-badge {
+    background: #ecfdf5;
+    color: #065f46;
+}
+
+.review-item.wrong .review-badge {
+    background: #fef2f2;
+    color: #991b1b;
+}
+
+.review-q {
+    margin: 10px 0;
+    line-height: 1.5;
+}
+
+.review-item .options {
+    margin-top: 8px;
+    gap: 8px;
+}
+
+.opt.static {
+    pointer-events: none;
+    cursor: default;
+    padding: 10px 14px;
+    justify-content: space-between;
+}
+
+.review-tag {
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.review-just {
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 12px;
+    background: #f8fafc;
+    font-size: 0.95rem;
 }
